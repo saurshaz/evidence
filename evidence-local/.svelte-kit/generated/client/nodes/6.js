@@ -1,0 +1,1 @@
+export { default as component } from "../../../../src/pages/about/how_it_works/+page.md";

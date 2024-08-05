@@ -17,3 +17,5 @@
 *.pyc
 /dlt/data
 /evidence/.evidence/meta
+/depr_____evidence/
+/evidence-local/node_modules/

@@ -1,0 +1,28 @@
+{
+    "name": "my-evidence-project",
+    "version": "0.0.1",
+    "scripts": {
+        "build": "evidence build",
+        "build:strict": "evidence build:strict",
+        "dev": "evidence dev --open /",
+        "test": "evidence build",
+        "sources": "evidence sources"
+    },
+    "engines": {
+        "npm": ">=7.0.0",
+        "node": ">=18.0.0"
+    },
+    "type": "module",
+    "dependencies": {
+        "@evidence-dev/core-components": "file:core-components",
+        "@evidence-dev/csv": "file:csv",
+        "@evidence-dev/duckdb": "file:duckdb",
+        "@evidence-dev/evidence": "file:evidence",
+        "@evidence-dev/plugin-connector": "^2.1.7"
+    },
+    "overrides": {
+        "jsonwebtoken": "9.0.0",
+        "trim@<0.0.3": ">0.0.3",
+        "sqlite3": "5.1.5"
+    }
+}

@@ -1,0 +1,1 @@
+export { default as component } from "../../../../src/pages/ncaaf/teams/[ncaaf_teams]/+page.md";

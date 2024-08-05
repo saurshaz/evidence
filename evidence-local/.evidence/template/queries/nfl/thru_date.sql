@@ -1,0 +1,1 @@
+SELECT '2023-01-07' as end_date

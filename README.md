@@ -4,8 +4,7 @@
 Thank you for checking out Evidence. 
 
 ## Steps to setup
-1. `npm link` and `npm install` from `package.json` directories
-2. run `./node_modules/.bin/vite build`
+1. `npm link` and `npm install` from `package.json` directories+
 2. run `./node_modules/.bin/vite` and look at `http://localhost:5173`
 
 

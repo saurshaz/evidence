@@ -1,2 +1,0 @@
-export function evalSources(dataPath: string, metaPath: string, filters?: import("./types.js").SourceFilters | undefined, strict?: boolean | undefined): Promise<import('./types.js').Manifest>;
-//# sourceMappingURL=evalSources.d.ts.map

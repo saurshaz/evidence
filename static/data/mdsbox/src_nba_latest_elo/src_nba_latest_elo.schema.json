@@ -1,1 +1,0 @@
-[{"name":"team_long","evidenceType":"string","typeFidelity":"precise"},{"name":"team","evidenceType":"string","typeFidelity":"precise"},{"name":"elo_rating","evidenceType":"number","typeFidelity":"precise"},{"name":"original_rating","evidenceType":"number","typeFidelity":"precise"},{"name":"latest_ratings","evidenceType":"boolean","typeFidelity":"precise"}]

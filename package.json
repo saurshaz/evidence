@@ -2,7 +2,8 @@
     "name": "my-evidence-project",
     "version": "0.0.1",
     "scripts": {
-        "build": "evidence build",
+        "e:build": "evidence build",
+        "build": "vite build",
         "build:strict": "evidence build:strict",
         "dev": "evidence dev --open /",
         "test": "evidence build",
@@ -21,12 +22,15 @@
         "@evidence-dev/evidence": "file:evidence",
         "@evidence-dev/plugin-connector": "^2.1.7",
         "@evidence-dev/postgres": "^1.0.6",
-        "@sveltejs/kit": "^2.5.25",
-        "evidence": "^1.0.3"
+        "@sveltejs/adapter-static": "^3.0.4",
+        "@sveltejs/adapter-vercel": "^3.1.0"
     },
     "overrides": {
         "jsonwebtoken": "9.0.0",
         "trim@<0.0.3": ">0.0.3",
         "sqlite3": "5.1.5"
+    },
+    "devDependencies": {
+        "@sveltejs/kit": "^2.5.26"
     }
 }

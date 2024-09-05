@@ -1,9 +1,10 @@
+// import adapter from '@sveltejs/adapter-static';
 import evidencePreprocess from '@evidence-dev/preprocess';
 import preprocess from 'svelte-preprocess';
-import adapter from '@sveltejs/adapter-static';
 import { evidencePlugins } from '@evidence-dev/plugin-connector';
 import fs from 'fs';
 import path from 'path';
+import adapter from '@sveltejs/adapter-vercel';
 
 /**
  * @param {Object} a
@@ -45,13 +46,32 @@ const config = {
 	],
 	onwarn: errorHandler,
 	kit: {
-		adapter: adapter({
-			strict: false
-		}),
+		// adapter: adapter({
+		// 	strict: false
+		// }),
+		adapter: adapter(),
 		files: {
 			routes: 'src/pages',
 			lib: 'src/components'
-		}
+		},
+		prerender: {
+			handleHttpError: ({ path, referrer, message }) => {
+				// ignore deliberate link to shiny 404 page
+				if (path === '/not-found' && referrer === '/blog/how-we-built-our-404-page') {
+					return;
+				}
+
+				// otherwise fail the build
+				// throw new Error(message); // FIXME:
+			}
+		},
+
+		// adapter: adapter({
+		// 	// default options are shown
+		// 	pages: 'build',
+		// 	assets: 'build',
+		// 	fallback: null
+		// })
 	}
 };
 

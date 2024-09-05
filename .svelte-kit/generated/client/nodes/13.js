@@ -1,0 +1,1 @@
+export { default as component } from "../../../../src/pages/nba/in-season tournament/+page.md";

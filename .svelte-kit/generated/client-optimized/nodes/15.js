@@ -1,0 +1,1 @@
+export { default as component } from "../../../../src/pages/nba/teams/+page.md";

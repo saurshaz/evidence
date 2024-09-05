@@ -1,0 +1,1 @@
+export { default as component } from "../../../../src/pages/ncaaf/conferences/[ncaaf_conferences]/+page.md";

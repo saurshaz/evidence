@@ -1,0 +1,1 @@
+export { default as component } from "../../../../src/pages/nba/historical_matchups/+page.md";

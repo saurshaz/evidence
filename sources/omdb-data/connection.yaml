@@ -1,0 +1,5 @@
+# This file was automatically generated
+name: omdbdata
+type: duckdb
+options:
+  filename: /../../../../../../dev/Dropbox/omdb-data.db

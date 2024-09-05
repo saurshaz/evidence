@@ -1,0 +1,9 @@
+{
+	"/": [
+		"src/pages/+layout.js",
+		"src/pages/+layout.js"
+	],
+	"/test": [
+		"src/pages/+layout.js"
+	]
+}

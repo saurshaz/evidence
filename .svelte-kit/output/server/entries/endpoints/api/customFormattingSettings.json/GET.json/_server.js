@@ -1,5 +1,5 @@
 import { GET } from "../_server.js";
-const prerender = true;
+const prerender = false;
 export {
   GET,
   prerender

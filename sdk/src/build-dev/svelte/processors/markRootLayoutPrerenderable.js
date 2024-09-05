@@ -49,7 +49,7 @@ export const markRootLayoutPrerenderable = () => {
 	// script({ content, filename, attributes }) {
 	// 	if (filename?.endsWith("/routes/+layout.svelte") && attributes.context === "module") {
 	//         return {
-	//             code: `export const prerender = true;\n${content}`
+	//             code: `export const prerender = false;\n${content}`
 	//         }
 	//     }
 	// }

@@ -1,1 +1,1 @@
-export { default as component } from "../../../../src/pages/nba/Lakers_vs_Clippers/+page.md";
+export { default as component } from "../../../../src/pages/test/+page.md";

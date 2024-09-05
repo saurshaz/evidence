@@ -1,23 +1,349 @@
-import { s as strictBuild, a as checkInputs, h as getColumnSummary, e as getFormatObjectFromString, d as formatValue, V as ValueError, Q as QueryLoad, b as EmptyChart, g as globals, p as propKey, u as uiColours, i as convertColumnToDate, S as Skeleton, D as DownloadData, C as CodeBlock, E as ErrorChart } from "./colours.js";
-import { c as create_ssr_component, v as validate_component, d as add_attribute, i as each, h as escape, l as add_styles, g as getContext, f as createEventDispatcher, s as setContext } from "./ssr.js";
-import { c as compute_rest_props, s as subscribe } from "./utils.js";
+import { c as create_ssr_component, v as validate_component, o as onDestroy, g as getContext, h as escape, d as add_attribute, i as each, a as spread, b as escape_object, l as add_styles, f as createEventDispatcher, s as setContext } from "./ssr.js";
+import { d as compute_slots, n as null_to_empty, c as compute_rest_props, s as subscribe } from "./utils.js";
+import { Query } from "@evidence-dev/sdk/usql";
 import { w as writable } from "./index2.js";
+import { tidy, mutate, summarize, n, nDistinct, min, max, median, mean, sum } from "@tidyjs/tidy";
+import ssf from "ssf";
+import { C as CUSTOM_FORMATTING_SETTINGS_CONTEXT_KEY } from "./buildQuery.js";
+import { B as BUILT_IN_FORMATS, f as findImplicitAutoFormat, i as isAutoFormat, a as autoFormat, b as fallbackFormat, c as inferColumnTypes, E as EvidenceType, T as TypeFidelity } from "./inferColumnTypes.js";
 import { I as Icon } from "./VennDiagram.svelte_svelte_type_style_lang.js";
 import { X, S as Search, f as ChevronUp, g as ChevronDown, h as ChevronsLeft, i as ChevronLeft, C as ChevronRight, j as ChevronsRight } from "./index4.js";
+import { ExportToCsv } from "export-to-csv";
 import { b as building } from "./environment.js";
 import chroma from "chroma-js";
 import { E as EnterFullScreen } from "./index5.js";
-import { Query } from "@evidence-dev/sdk/usql";
 import { t as toasts } from "./stores.js";
 import { query } from "@evidence-dev/universal-sql/client-duckdb";
 import debounce from "lodash.debounce";
+const globals = typeof window !== "undefined" ? window : typeof globalThis !== "undefined" ? globalThis : (
+  // @ts-ignore Node typings have this
+  global
+);
+const Skeleton = create_ssr_component(($$result, $$props, $$bindings, slots) => {
+  return `<div class="animate-pulse h-full w-full my-2" data-svelte-h="svelte-7iquaz"><span class="sr-only">Loading...</span> <div class="h-full w-full bg-gray-200 rounded-md dark:bg-gray-400"></div></div>`;
+});
 const Fullscreen = create_ssr_component(($$result, $$props, $$bindings, slots) => {
   let { open = false } = $$props;
   if ($$props.open === void 0 && $$bindings.open && open !== void 0)
     $$bindings.open(open);
   return `<dialog class="w-[90vw] rounded-lg relative"><button class="absolute top-2 right-2 text-gray-500 hover:text-gray-700 focus:outline-none">${validate_component(Icon, "Icon").$$render($$result, { class: "w-6 h-6", src: X }, {}, {})}</button> <div class="py-2 px-6">${slots.default ? slots.default({}) : ``}</div></dialog>`;
 });
-const css$7 = {
+function isEmptyDataset(data) {
+  if (!data || !data[0] || !data.length) {
+    return true;
+  } else {
+    return false;
+  }
+}
+const QueryLoad = create_ssr_component(($$result, $$props, $$bindings, slots) => {
+  let $$slots = compute_slots(slots);
+  let { data } = $$props;
+  let unsub = () => {
+  };
+  let _data;
+  onDestroy(unsub);
+  if ($$props.data === void 0 && $$bindings.data && data !== void 0)
+    $$bindings.data(data);
+  {
+    if (Query.isQuery(data)) {
+      console.log("Query data", data);
+      data.fetch();
+      unsub();
+      unsub = data.subscribe((v) => {
+        _data = v;
+      });
+    }
+  }
+  return `${!data ? ` ${slots.default ? slots.default({ loaded: data }) : ``}` : `${!Query.isQuery(data) ? ` ${(Array.isArray(data) || !data) && isEmptyDataset(data) && $$slots.empty ? ` ${slots.empty ? slots.empty({ loaded: data }) : ``}` : ` ${slots.default ? slots.default({ loaded: data }) : ``}`}` : `${!_data || !_data.dataLoaded && !_data.error ? `${slots.skeleton ? slots.skeleton({ loaded: _data }) : ` <div class="w-full h-64">${validate_component(Skeleton, "Skeleton").$$render($$result, {}, {}, {})}</div> `}` : `${_data.error && $$slots.error ? `${slots.error ? slots.error({ loaded: _data }) : ``}` : `${!_data.length && !_data.error && $$slots.empty ? `${slots.empty ? slots.empty({ loaded: _data }) : ``}` : `${slots.default ? slots.default({ loaded: _data }) : ``}`}`}`}`}`} `;
+});
+function standardizeDateString(date) {
+  if (date && typeof date === "string") {
+    let dateSplit = date.split(" ");
+    if (!date.includes(":")) {
+      date = date + "T00:00:00";
+    }
+    if (dateSplit.length > 2) {
+      date = dateSplit[0] + " " + dateSplit[1];
+    }
+    const re = /\.([^\s]+)/;
+    date = date.replace(re, "");
+    date = date.replace("Z", "");
+    date = date.replace(" ", "T");
+  }
+  return date;
+}
+function convertColumnToDate(data, column) {
+  data = tidy(
+    data,
+    mutate({ [column]: (d) => d[column] ? new Date(standardizeDateString(d[column])) : null })
+  );
+  return data;
+}
+function standardizeDateColumn(data, column) {
+  data = tidy(data, mutate({ [column]: (d) => standardizeDateString(d[column]) }));
+  return data;
+}
+const AXIS_FORMATTING_CONTEXT = "axis";
+const VALUE_FORMATTING_CONTEXT = "value";
+const getCustomFormats = () => {
+  try {
+    return getContext(CUSTOM_FORMATTING_SETTINGS_CONTEXT_KEY)?.getCustomFormats() || [];
+  } catch (error) {
+    return [];
+  }
+};
+const lookupColumnFormat = (columnName, columnEvidenceType, columnUnitSummary) => {
+  let potentialFormatTag = maybeExtractFormatTag(columnName);
+  if (columnEvidenceType.evidenceType === "string") {
+    return void 0;
+  }
+  if (potentialFormatTag) {
+    let customFormats = getCustomFormats();
+    let matchingFormat = [...BUILT_IN_FORMATS, ...customFormats].find(
+      (format) => format.formatTag?.toLowerCase() === potentialFormatTag?.toLowerCase?.()
+    );
+    if (matchingFormat) {
+      return matchingFormat;
+    }
+  }
+  let matchingImplicitAutoFormat = findImplicitAutoFormat(
+    columnName,
+    columnEvidenceType,
+    columnUnitSummary
+  );
+  if (matchingImplicitAutoFormat) {
+    return matchingImplicitAutoFormat;
+  }
+  return void 0;
+};
+function getFormatObjectFromString(formatString, valueType = void 0) {
+  let potentialFormatTag = formatString;
+  let customFormats = getCustomFormats();
+  let matchingFormat = [...BUILT_IN_FORMATS, ...customFormats].find(
+    (format) => format.formatTag?.toLowerCase() === potentialFormatTag?.toLowerCase?.()
+  );
+  let newFormat = {};
+  if (matchingFormat) {
+    return matchingFormat;
+  } else {
+    newFormat = {
+      formatTag: "custom",
+      formatCode: potentialFormatTag
+    };
+    if (valueType) {
+      newFormat.valueType = valueType;
+    }
+    return newFormat;
+  }
+}
+const formatValue = (value, columnFormat = void 0, columnUnitSummary = void 0) => {
+  try {
+    return applyFormatting(value, columnFormat, columnUnitSummary, VALUE_FORMATTING_CONTEXT);
+  } catch (error) {
+    console.warn(
+      `Unexpected error calling applyFormatting(${value}, ${columnFormat}, ${VALUE_FORMATTING_CONTEXT}, ${columnUnitSummary}). Error=${error}`
+    );
+    return value;
+  }
+};
+const formatAxisValue = (value, columnFormat = void 0, columnUnitSummary = void 0) => {
+  try {
+    return applyFormatting(value, columnFormat, columnUnitSummary, AXIS_FORMATTING_CONTEXT);
+  } catch (error) {
+  }
+  return value;
+};
+const applyTitleTagReplacement = (columnName, columnFormatSettings) => {
+  let result = columnName;
+  if (columnName && columnFormatSettings?.formatTag) {
+    let lastIndexOfTag = columnName.toLowerCase().lastIndexOf(`_${columnFormatSettings.formatTag.toLowerCase()}`);
+    let titleTagReplacement = "";
+    if (lastIndexOfTag > 0) {
+      if (typeof columnFormatSettings?.titleTagReplacement === "string") {
+        titleTagReplacement = columnFormatSettings.titleTagReplacement;
+      }
+      result = columnName.substring(0, lastIndexOfTag) + titleTagReplacement;
+    }
+  }
+  return result;
+};
+function applyFormatting(value, columnFormat = void 0, columnUnitSummary = void 0, formattingContext = VALUE_FORMATTING_CONTEXT) {
+  if (value === void 0 || value === null) {
+    return "-";
+  }
+  let result = void 0;
+  if (columnFormat) {
+    try {
+      let formattingCode = getEffectiveFormattingCode(columnFormat, formattingContext);
+      let typedValue;
+      try {
+        if (columnFormat.valueType === "date" && typeof value === "string") {
+          typedValue = new Date(standardizeDateString(value));
+        } else if (value instanceof Date) {
+          typedValue = new Date(value.toISOString().slice(0, -1));
+        } else if (columnFormat.valueType === "number" && typeof value !== "number" && !Number.isNaN(value)) {
+          typedValue = Number(value);
+        } else {
+          typedValue = value;
+        }
+      } catch (error) {
+        typedValue = value;
+      }
+      if (isAutoFormat(columnFormat, formattingCode)) {
+        try {
+          result = autoFormat(typedValue, columnFormat, columnUnitSummary);
+        } catch (error) {
+          console.warn(`Unexpected error applying auto formatting. Error=${error}`);
+        }
+      } else {
+        result = ssf.format(formattingCode, typedValue);
+      }
+    } catch (error) {
+      console.warn(`Unexpected error applying formatting ${error}`);
+    }
+  }
+  if (result === void 0) {
+    result = fallbackFormat(value);
+  }
+  return result;
+}
+function getEffectiveFormattingCode(columnFormat, formattingContext = VALUE_FORMATTING_CONTEXT) {
+  if (typeof columnFormat === "string") {
+    return columnFormat;
+  } else {
+    if (formattingContext === AXIS_FORMATTING_CONTEXT && columnFormat?.axisFormatCode) {
+      return columnFormat.axisFormatCode;
+    }
+    return columnFormat?.formatCode;
+  }
+}
+function maybeExtractFormatTag(columnName) {
+  let normalizedColName = columnName.toLowerCase();
+  let lastUnderScoreIndex = normalizedColName.lastIndexOf("_");
+  if (lastUnderScoreIndex > 0) {
+    return normalizedColName.substr(lastUnderScoreIndex).replace("_", "");
+  } else {
+    return void 0;
+  }
+}
+function formatTitle(column, columnFormat) {
+  let result = applyTitleTagReplacement(column, columnFormat);
+  let acronyms = ["id", "gdp"];
+  let lowercase = ["of", "the", "and", "in", "on"];
+  function toTitleCase(str) {
+    return str.replace(/\S*/g, function(txt) {
+      if (!acronyms.includes(txt) && !lowercase.includes(txt)) {
+        return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+      } else if (acronyms.includes(txt)) {
+        return txt.toUpperCase();
+      } else {
+        return txt.toLowerCase();
+      }
+    });
+  }
+  result = toTitleCase(result.replace(/_/g, " "));
+  return result;
+}
+function getColumnUnitSummary(data, columnName, isNumeric = true) {
+  const seriesExtents = tidy(
+    data,
+    isNumeric ? summarize({
+      count: n(columnName),
+      countDistinct: nDistinct(columnName),
+      min: min(columnName),
+      max: max(columnName),
+      median: median(columnName),
+      mean: mean(columnName),
+      sum: sum(columnName)
+    }) : summarize({ count: n(columnName), countDistinct: nDistinct(columnName) })
+  )[0];
+  const { maxDecimals, unitType } = summarizeUnits(data.map((row) => row[columnName]));
+  return {
+    min: seriesExtents.min,
+    max: seriesExtents.max,
+    median: seriesExtents.median,
+    mean: seriesExtents.mean,
+    count: seriesExtents.count,
+    countDistinct: seriesExtents.countDistinct,
+    sum: seriesExtents.sum,
+    maxDecimals,
+    unitType
+  };
+}
+function summarizeUnits(series) {
+  if (series === void 0 || series === null || series.length === 0) {
+    return {
+      maxDecimals: 0,
+      unitType: "unknown"
+    };
+  } else {
+    let maxDecimals = 0;
+    for (const element of series) {
+      const decimal_places = element?.toString().split(".")[1]?.length;
+      if (decimal_places > maxDecimals) {
+        maxDecimals = decimal_places;
+      }
+    }
+    return {
+      maxDecimals,
+      unitType: "number"
+    };
+  }
+}
+function getColumnSummary(data, returnType = "object") {
+  const columnSummary = {};
+  const types = inferColumnTypes(data);
+  for (const colName of Object.keys(data[0])) {
+    const evidenceColumnType = types.find(
+      (item) => item.name?.toLowerCase() === colName?.toLowerCase()
+    ) ?? {
+      name: colName,
+      evidenceType: EvidenceType.NUMBER,
+      typeFidelity: TypeFidelity.INFERRED
+    };
+    const type = evidenceColumnType.evidenceType;
+    let columnUnitSummary = evidenceColumnType.evidenceType === "number" ? getColumnUnitSummary(data, colName, true) : getColumnUnitSummary(data, colName, false);
+    if (evidenceColumnType.evidenceType !== "number") {
+      columnUnitSummary.maxDecimals = 0;
+      columnUnitSummary.unitType = evidenceColumnType.evidenceType;
+    }
+    const format = lookupColumnFormat(colName, evidenceColumnType, columnUnitSummary);
+    columnSummary[colName] = {
+      title: formatTitle(colName, format),
+      type,
+      evidenceColumnType,
+      format,
+      columnUnitSummary
+    };
+  }
+  if (returnType !== "object") {
+    return Object.entries(columnSummary).map(([key, value]) => ({ id: key, ...value }));
+  }
+  return columnSummary;
+}
+var define_import_meta_env_default = { BASE_URL: "/", MODE: "production", DEV: false, PROD: true, SSR: true };
+const configKey = Symbol();
+const propKey = Symbol();
+const strictBuild = define_import_meta_env_default.VITE_BUILD_STRICT === "true";
+const css$9 = {
+  code: ".credentials-link.svelte-1no0yro{color:var(--blue-500);text-decoration:none}.credentials-link.svelte-1no0yro:hover{color:var(--blue-700)}",
+  map: `{"version":3,"file":"ErrorChart.svelte","sources":["ErrorChart.svelte"],"sourcesContent":["<script context=\\"module\\">\\n\\texport const evidenceInclude = true;\\n<\/script>\\n\\n<script>\\n\\timport { dev } from '$app/environment';\\n\\texport let error;\\n\\texport let chartType;\\n\\texport let minHeight = '150';\\n\\n\\tconst DevMissingCredentialsError = 'SQL Error: Missing datasource connection.';\\n\\tconst ProdMissingCredentialsError =\\n\\t\\t'SQL Error: Missing database connection; set the EVIDENCE_DATABASE environment variable.';\\n<\/script>\\n\\n<div\\n\\twidth=\\"100%\\"\\n\\tclass=\\"grid grid-rows-auto box-content grid-cols-1 justify-center bg-red-50 text-grey-700 font-ui font-normal rounded border border-red-200 min-h-[{minHeight}px] py-5 px-8 my-5 print:break-inside-avoid\\"\\n>\\n\\t<div class=\\"m-auto w-full\\">\\n\\t\\t<div class=\\"font-bold text-center text-lg\\">\\n\\t\\t\\t{chartType}\\n\\t\\t</div>\\n\\t\\t<div class=\\"text-center [word-wrap:break-work] text-xs\\">\\n\\t\\t\\t{error}\\n\\t\\t\\t{#if dev && error === DevMissingCredentialsError}\\n\\t\\t\\t\\t<br /><a class=\\"credentials-link\\" href=\\"/settings\\"> Add&nbsp;credentials&nbsp;&rarr;</a>\\n\\t\\t\\t{:else if !dev && error === ProdMissingCredentialsError}\\n\\t\\t\\t\\t<br /><a\\n\\t\\t\\t\\t\\tclass=\\"credentials-link\\"\\n\\t\\t\\t\\t\\thref=\\"https://docs.evidence.dev/cli/#environment-variables\\"\\n\\t\\t\\t\\t\\t>View&nbsp;environment&nbsp;variables&nbsp;&rarr;</a\\n\\t\\t\\t\\t>\\n\\t\\t\\t{/if}\\n\\t\\t</div>\\n\\t</div>\\n</div>\\n\\n<style>\\n\\t.credentials-link {\\n\\t\\tcolor: var(--blue-500);\\n\\t\\ttext-decoration: none;\\n\\t}\\n\\n\\t.credentials-link:hover {\\n\\t\\tcolor: var(--blue-700);\\n\\t}</style>\\n"],"names":[],"mappings":"AAuCC,gCAAkB,CACjB,KAAK,CAAE,IAAI,UAAU,CAAC,CACtB,eAAe,CAAE,IAClB,CAEA,gCAAiB,MAAO,CACvB,KAAK,CAAE,IAAI,UAAU,CACtB"}`
+};
+const ProdMissingCredentialsError = "SQL Error: Missing database connection; set the EVIDENCE_DATABASE environment variable.";
+const ErrorChart = create_ssr_component(($$result, $$props, $$bindings, slots) => {
+  let { error } = $$props;
+  let { chartType: chartType2 } = $$props;
+  let { minHeight = "150" } = $$props;
+  if ($$props.error === void 0 && $$bindings.error && error !== void 0)
+    $$bindings.error(error);
+  if ($$props.chartType === void 0 && $$bindings.chartType && chartType2 !== void 0)
+    $$bindings.chartType(chartType2);
+  if ($$props.minHeight === void 0 && $$bindings.minHeight && minHeight !== void 0)
+    $$bindings.minHeight(minHeight);
+  $$result.css.add(css$9);
+  return `<div width="100%" class="${"grid grid-rows-auto box-content grid-cols-1 justify-center bg-red-50 text-grey-700 font-ui font-normal rounded border border-red-200 min-h-[" + escape(minHeight, true) + "px] py-5 px-8 my-5 print:break-inside-avoid svelte-1no0yro"}"><div class="m-auto w-full"><div class="font-bold text-center text-lg">${escape(chartType2)}</div> <div class="text-center [word-wrap:break-work] text-xs">${escape(error)} ${`${error === ProdMissingCredentialsError ? `<br><a class="credentials-link svelte-1no0yro" href="https://docs.evidence.dev/cli/#environment-variables" data-svelte-h="svelte-16l7o12">View environment variables →</a>` : ``}`}</div></div> </div>`;
+});
+const css$8 = {
   code: ".search-container.svelte-104e064{width:30%;display:block;align-items:center;border:1px solid var(--grey-300);border-radius:4px;height:22px;position:relative;margin:25px 3px 10px 0px;box-sizing:content-box;background-color:white}.search-icon.svelte-104e064{height:16px;width:16px;padding-left:3px;margin:0;position:absolute;top:50%;transform:translateY(-50%);-ms-transform:translateY(-50%);color:var(--grey-400);box-sizing:content-box}.search-bar.svelte-104e064{margin:0;position:absolute;top:50%;transform:translateY(-50%);-ms-transform:translateY(-50%);border:none;padding-left:23px;color:var(--grey-600);font-size:9pt;width:calc(100% - 10px);font-family:Arial;line-height:normal}input.search-bar.svelte-104e064::-moz-placeholder{color:var(--grey-500)}input.search-bar.svelte-104e064::placeholder{color:var(--grey-500)}.svelte-104e064:focus{outline:none}@media(max-width: 600px){.search-container.svelte-104e064{width:98%;height:28px}.search-bar.svelte-104e064{font-size:16px;width:calc(100% - 20px)}}@media print{.search-container.svelte-104e064{display:none}}",
   map: `{"version":3,"file":"SearchBar.svelte","sources":["SearchBar.svelte"],"sourcesContent":["<script context=\\"module\\">\\n\\texport const evidenceInclude = true;\\n<\/script>\\n\\n<script>\\n\\timport { Icon } from '@steeze-ui/svelte-icon';\\n\\timport { Search } from '@steeze-ui/tabler-icons';\\n\\n\\texport let placeholder = 'Search';\\n\\texport let value;\\n\\texport let searchFunction;\\n<\/script>\\n\\n<div class=\\"search-container\\">\\n\\t<input\\n\\t\\tclass=\\"search-bar\\"\\n\\t\\ttype=\\"text\\"\\n\\t\\t{placeholder}\\n\\t\\tbind:value\\n\\t\\ton:keyup={() => searchFunction(value)}\\n\\t/>\\n\\t<div class=\\"search-icon\\">\\n\\t\\t<Icon src={Search} class=\\"pl-0.5\\" />\\n\\t</div>\\n</div>\\n\\n<style>\\n\\t.search-container {\\n\\t\\twidth: 30%;\\n\\t\\tdisplay: block;\\n\\t\\talign-items: center;\\n\\t\\tborder: 1px solid var(--grey-300);\\n\\t\\tborder-radius: 4px;\\n\\t\\theight: 22px;\\n\\t\\tposition: relative;\\n\\t\\tmargin: 25px 3px 10px 0px;\\n\\t\\tbox-sizing: content-box;\\n\\t\\tbackground-color: white;\\n\\t}\\n\\n\\t.search-icon {\\n\\t\\theight: 16px;\\n\\t\\twidth: 16px;\\n\\t\\tpadding-left: 3px;\\n\\t\\tmargin: 0;\\n\\t\\tposition: absolute;\\n\\t\\ttop: 50%;\\n\\t\\ttransform: translateY(-50%);\\n\\t\\t-ms-transform: translateY(-50%);\\n\\t\\tcolor: var(--grey-400);\\n\\t\\tbox-sizing: content-box;\\n\\t}\\n\\n\\t.search-bar {\\n\\t\\tmargin: 0;\\n\\t\\tposition: absolute;\\n\\t\\ttop: 50%;\\n\\t\\ttransform: translateY(-50%);\\n\\t\\t-ms-transform: translateY(-50%);\\n\\n\\t\\tborder: none;\\n\\t\\tpadding-left: 23px;\\n\\n\\t\\tcolor: var(--grey-600);\\n\\t\\tfont-size: 9pt;\\n\\n\\t\\twidth: calc(100% - 10px);\\n\\n\\t\\tfont-family: Arial;\\n\\t\\tline-height: normal;\\n\\t}\\n\\n\\tinput.search-bar::-moz-placeholder {\\n\\t\\tcolor: var(--grey-500);\\n\\t}\\n\\n\\tinput.search-bar::placeholder {\\n\\t\\tcolor: var(--grey-500);\\n\\t}\\n\\n\\t*:focus {\\n\\t\\toutline: none;\\n\\t}\\n\\n\\t@media (max-width: 600px) {\\n\\t\\t.search-container {\\n\\t\\t\\twidth: 98%;\\n\\t\\t\\theight: 28px;\\n\\t\\t}\\n\\n\\t\\t.search-bar {\\n\\t\\t\\tfont-size: 16px;\\n\\t\\t\\twidth: calc(100% - 20px);\\n\\t\\t}\\n\\t}\\n\\n\\t@media print {\\n\\t\\t.search-container {\\n\\t\\t\\tdisplay: none;\\n\\t\\t}\\n\\t}</style>\\n"],"names":[],"mappings":"AA2BC,gCAAkB,CACjB,KAAK,CAAE,GAAG,CACV,OAAO,CAAE,KAAK,CACd,WAAW,CAAE,MAAM,CACnB,MAAM,CAAE,GAAG,CAAC,KAAK,CAAC,IAAI,UAAU,CAAC,CACjC,aAAa,CAAE,GAAG,CAClB,MAAM,CAAE,IAAI,CACZ,QAAQ,CAAE,QAAQ,CAClB,MAAM,CAAE,IAAI,CAAC,GAAG,CAAC,IAAI,CAAC,GAAG,CACzB,UAAU,CAAE,WAAW,CACvB,gBAAgB,CAAE,KACnB,CAEA,2BAAa,CACZ,MAAM,CAAE,IAAI,CACZ,KAAK,CAAE,IAAI,CACX,YAAY,CAAE,GAAG,CACjB,MAAM,CAAE,CAAC,CACT,QAAQ,CAAE,QAAQ,CAClB,GAAG,CAAE,GAAG,CACR,SAAS,CAAE,WAAW,IAAI,CAAC,CAC3B,aAAa,CAAE,WAAW,IAAI,CAAC,CAC/B,KAAK,CAAE,IAAI,UAAU,CAAC,CACtB,UAAU,CAAE,WACb,CAEA,0BAAY,CACX,MAAM,CAAE,CAAC,CACT,QAAQ,CAAE,QAAQ,CAClB,GAAG,CAAE,GAAG,CACR,SAAS,CAAE,WAAW,IAAI,CAAC,CAC3B,aAAa,CAAE,WAAW,IAAI,CAAC,CAE/B,MAAM,CAAE,IAAI,CACZ,YAAY,CAAE,IAAI,CAElB,KAAK,CAAE,IAAI,UAAU,CAAC,CACtB,SAAS,CAAE,GAAG,CAEd,KAAK,CAAE,KAAK,IAAI,CAAC,CAAC,CAAC,IAAI,CAAC,CAExB,WAAW,CAAE,KAAK,CAClB,WAAW,CAAE,MACd,CAEA,KAAK,0BAAW,kBAAmB,CAClC,KAAK,CAAE,IAAI,UAAU,CACtB,CAEA,KAAK,0BAAW,aAAc,CAC7B,KAAK,CAAE,IAAI,UAAU,CACtB,CAEA,eAAC,MAAO,CACP,OAAO,CAAE,IACV,CAEA,MAAO,YAAY,KAAK,CAAE,CACzB,gCAAkB,CACjB,KAAK,CAAE,GAAG,CACV,MAAM,CAAE,IACT,CAEA,0BAAY,CACX,SAAS,CAAE,IAAI,CACf,KAAK,CAAE,KAAK,IAAI,CAAC,CAAC,CAAC,IAAI,CACxB,CACD,CAEA,OAAO,KAAM,CACZ,gCAAkB,CACjB,OAAO,CAAE,IACV,CACD"}`
 };
@@ -31,8 +357,100 @@ const SearchBar = create_ssr_component(($$result, $$props, $$bindings, slots) =>
     $$bindings.value(value);
   if ($$props.searchFunction === void 0 && $$bindings.searchFunction && searchFunction !== void 0)
     $$bindings.searchFunction(searchFunction);
-  $$result.css.add(css$7);
+  $$result.css.add(css$8);
   return `<div class="search-container svelte-104e064"><input class="search-bar svelte-104e064" type="text"${add_attribute("placeholder", placeholder, 0)}${add_attribute("value", value, 0)}> <div class="search-icon svelte-104e064">${validate_component(Icon, "Icon").$$render($$result, { src: Search, class: "pl-0.5" }, {}, {})}</div> </div>`;
+});
+function checkInputs(data, reqCols, optCols) {
+  let columns = [];
+  if (data === void 0) {
+    throw Error("No data provided");
+  } else if (typeof data !== "object") {
+    throw Error(
+      "'" + data + "' is not a recognized query result. Data should be provided in the format: data = {" + data.replace("data.", "") + "}"
+    );
+  } else if (data[0] === void 0 || data.length === 0) {
+    throw Error(
+      "Dataset is empty: query ran successfully, but no data was returned from the database"
+    );
+  }
+  if (data[0]?.error_object?.error != null) {
+    throw Error("SQL Error: " + data[0]?.error_object?.error?.message);
+  }
+  if (reqCols != void 0) {
+    if (!(reqCols instanceof Array)) {
+      throw Error("reqCols must be passed in as an array");
+    }
+    for (var i = 0; i < reqCols.length; i++) {
+      if (reqCols[i] == null) {
+        throw Error("Missing required columns");
+      }
+    }
+    if (Query.isQuery(data)) {
+      for (const col of data.columns) {
+        columns.push(col.column_name);
+      }
+    } else {
+      for (const key of Object.keys(data[0])) {
+        columns.push(key);
+      }
+    }
+    let currentCol;
+    for (i = 0; i < reqCols.length; i++) {
+      currentCol = reqCols[i];
+      if (!columns.includes(currentCol)) {
+        throw Error("'" + currentCol + "' is not a column in the dataset");
+      }
+    }
+    if (optCols != void 0 && optCols[0] != null) {
+      for (i = 0; i < optCols.length; i++) {
+        currentCol = optCols[i];
+        if (!columns.includes(currentCol)) {
+          throw Error("'" + currentCol + "' is not a column in the dataset");
+        }
+      }
+    }
+  }
+}
+const css$7 = {
+  code: "button.svelte-p80uux svg{stroke:var(--grey-400);margin-top:auto;margin-bottom:auto;transition:stroke 200ms}button.svelte-p80uux{display:flex;cursor:pointer;font-family:var(--ui-font-family);font-size:1em;color:var(--grey-400);justify-items:flex-end;align-items:baseline;background-color:transparent;border:none;padding:0;margin:0 5px;gap:3px;transition:color 200ms;-moz-user-select:none;-webkit-user-select:none;-o-user-select:none;user-select:none}button.svelte-p80uux:hover{color:var(--blue-600);transition:color 200ms}button.svelte-p80uux:hover svg{stroke:var(--blue-600);transition:stroke 200ms}@media(max-width: 600px){button.svelte-p80uux{display:none}}@media print{button.svelte-p80uux{display:none}}",
+  map: `{"version":3,"file":"DownloadData.svelte","sources":["DownloadData.svelte"],"sourcesContent":["<script context=\\"module\\">\\n\\texport const evidenceInclude = true;\\n<\/script>\\n\\n<script>\\n\\timport { ExportToCsv } from 'export-to-csv';\\n\\timport { fade } from 'svelte/transition';\\n\\n\\texport let data = undefined;\\n\\texport let queryID = undefined;\\n\\texport let text = 'Download';\\n\\texport let display = true;\\n\\t$: display = display === 'true' || display === true;\\n\\n\\tconst date = new Date();\\n\\tconst localISOTime = new Date(date.getTime() - date.getTimezoneOffset() * 60000)\\n\\t\\t.toISOString()\\n\\t\\t.slice(0, 19)\\n\\t\\t.replaceAll(':', '-');\\n\\n\\texport let downloadData = (data) => {\\n\\t\\tconst options = {\\n\\t\\t\\tfieldSeparator: ',',\\n\\t\\t\\tquoteStrings: '\\"',\\n\\t\\t\\tdecimalSeparator: '.',\\n\\t\\t\\tshowLabels: true,\\n\\t\\t\\tshowTitle: false,\\n\\t\\t\\tfilename: (queryID ?? 'evidence_download') + \` \${localISOTime}\`,\\n\\t\\t\\tuseTextFile: false,\\n\\t\\t\\tuseBom: true,\\n\\t\\t\\tuseKeysAsHeaders: true\\n\\t\\t};\\n\\n\\t\\tconst data_copy = JSON.parse(JSON.stringify(Array.from(data)));\\n\\n\\t\\tconst csvExporter = new ExportToCsv(options);\\n\\n\\t\\tcsvExporter.generateCsv(data_copy);\\n\\t};\\n<\/script>\\n\\n{#if display}\\n\\t<div transition:fade|local={{ duration: 200 }}>\\n\\t\\t<button type=\\"button\\" aria-label={text} class={$$props.class} on:click={downloadData(data)}>\\n\\t\\t\\t<span>{text}</span>\\n\\t\\t\\t<slot>\\n\\t\\t\\t\\t<svg\\n\\t\\t\\t\\t\\twidth=\\"12\\"\\n\\t\\t\\t\\t\\theight=\\"12\\"\\n\\t\\t\\t\\t\\tviewBox=\\"0 0 24 24\\"\\n\\t\\t\\t\\t\\tfill=\\"none\\"\\n\\t\\t\\t\\t\\tstroke-width=\\"2\\"\\n\\t\\t\\t\\t\\tstroke-linecap=\\"round\\"\\n\\t\\t\\t\\t\\tstroke-linejoin=\\"round\\"\\n\\t\\t\\t\\t\\t><path d=\\"M3 15v4c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-4M17 9l-5 5-5-5M12 12.8V2.5\\" /></svg\\n\\t\\t\\t\\t>\\n\\t\\t\\t</slot>\\n\\t\\t</button>\\n\\t</div>\\n{/if}\\n\\n<style>\\n\\tbutton :global(svg) {\\n\\t\\tstroke: var(--grey-400);\\n\\t\\tmargin-top: auto;\\n\\t\\tmargin-bottom: auto;\\n\\t\\ttransition: stroke 200ms;\\n\\t}\\n\\n\\tbutton {\\n\\t\\tdisplay: flex;\\n\\t\\tcursor: pointer;\\n\\t\\tfont-family: var(--ui-font-family);\\n\\t\\tfont-size: 1em;\\n\\t\\tcolor: var(--grey-400);\\n\\t\\tjustify-items: flex-end;\\n\\t\\talign-items: baseline;\\n\\t\\tbackground-color: transparent;\\n\\t\\tborder: none;\\n\\t\\tpadding: 0;\\n\\t\\tmargin: 0 5px;\\n\\t\\tgap: 3px;\\n\\t\\ttransition: color 200ms;\\n\\t\\t-moz-user-select: none;\\n\\t\\t-webkit-user-select: none;\\n\\t\\t-o-user-select: none;\\n\\t\\tuser-select: none;\\n\\t}\\n\\n\\tbutton:hover {\\n\\t\\tcolor: var(--blue-600);\\n\\t\\ttransition: color 200ms;\\n\\t}\\n\\n\\tbutton:hover :global(svg) {\\n\\t\\tstroke: var(--blue-600);\\n\\t\\ttransition: stroke 200ms;\\n\\t}\\n\\n\\t@media (max-width: 600px) {\\n\\t\\tbutton {\\n\\t\\t\\tdisplay: none;\\n\\t\\t}\\n\\t}\\n\\n\\t@media print {\\n\\t\\tbutton {\\n\\t\\t\\tdisplay: none;\\n\\t\\t}\\n\\t}</style>\\n"],"names":[],"mappings":"AA8DC,oBAAM,CAAS,GAAK,CACnB,MAAM,CAAE,IAAI,UAAU,CAAC,CACvB,UAAU,CAAE,IAAI,CAChB,aAAa,CAAE,IAAI,CACnB,UAAU,CAAE,MAAM,CAAC,KACpB,CAEA,oBAAO,CACN,OAAO,CAAE,IAAI,CACb,MAAM,CAAE,OAAO,CACf,WAAW,CAAE,IAAI,gBAAgB,CAAC,CAClC,SAAS,CAAE,GAAG,CACd,KAAK,CAAE,IAAI,UAAU,CAAC,CACtB,aAAa,CAAE,QAAQ,CACvB,WAAW,CAAE,QAAQ,CACrB,gBAAgB,CAAE,WAAW,CAC7B,MAAM,CAAE,IAAI,CACZ,OAAO,CAAE,CAAC,CACV,MAAM,CAAE,CAAC,CAAC,GAAG,CACb,GAAG,CAAE,GAAG,CACR,UAAU,CAAE,KAAK,CAAC,KAAK,CACvB,gBAAgB,CAAE,IAAI,CACtB,mBAAmB,CAAE,IAAI,CACzB,cAAc,CAAE,IAAI,CACpB,WAAW,CAAE,IACd,CAEA,oBAAM,MAAO,CACZ,KAAK,CAAE,IAAI,UAAU,CAAC,CACtB,UAAU,CAAE,KAAK,CAAC,KACnB,CAEA,oBAAM,MAAM,CAAS,GAAK,CACzB,MAAM,CAAE,IAAI,UAAU,CAAC,CACvB,UAAU,CAAE,MAAM,CAAC,KACpB,CAEA,MAAO,YAAY,KAAK,CAAE,CACzB,oBAAO,CACN,OAAO,CAAE,IACV,CACD,CAEA,OAAO,KAAM,CACZ,oBAAO,CACN,OAAO,CAAE,IACV,CACD"}`
+};
+const DownloadData = create_ssr_component(($$result, $$props, $$bindings, slots) => {
+  let { data = void 0 } = $$props;
+  let { queryID = void 0 } = $$props;
+  let { text = "Download" } = $$props;
+  let { display = true } = $$props;
+  const date = /* @__PURE__ */ new Date();
+  const localISOTime = new Date(date.getTime() - date.getTimezoneOffset() * 6e4).toISOString().slice(0, 19).replaceAll(":", "-");
+  let { downloadData = (data2) => {
+    const options = {
+      fieldSeparator: ",",
+      quoteStrings: '"',
+      decimalSeparator: ".",
+      showLabels: true,
+      showTitle: false,
+      filename: (queryID ?? "evidence_download") + ` ${localISOTime}`,
+      useTextFile: false,
+      useBom: true,
+      useKeysAsHeaders: true
+    };
+    const data_copy = JSON.parse(JSON.stringify(Array.from(data2)));
+    const csvExporter = new ExportToCsv(options);
+    csvExporter.generateCsv(data_copy);
+  } } = $$props;
+  if ($$props.data === void 0 && $$bindings.data && data !== void 0)
+    $$bindings.data(data);
+  if ($$props.queryID === void 0 && $$bindings.queryID && queryID !== void 0)
+    $$bindings.queryID(queryID);
+  if ($$props.text === void 0 && $$bindings.text && text !== void 0)
+    $$bindings.text(text);
+  if ($$props.display === void 0 && $$bindings.display && display !== void 0)
+    $$bindings.display(display);
+  if ($$props.downloadData === void 0 && $$bindings.downloadData && downloadData !== void 0)
+    $$bindings.downloadData(downloadData);
+  $$result.css.add(css$7);
+  display = display === "true" || display === true;
+  return `${display ? `<div><button type="button"${add_attribute("aria-label", text, 0)} class="${escape(null_to_empty($$props.class), true) + " svelte-p80uux"}"><span>${escape(text)}</span> ${slots.default ? slots.default({}) : ` <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-4M17 9l-5 5-5-5M12 12.8V2.5"></path></svg> `}</button></div>` : ``}`;
 });
 const InvisibleLinks = create_ssr_component(($$result, $$props, $$bindings, slots) => {
   let { data } = $$props;
@@ -44,6 +462,45 @@ const InvisibleLinks = create_ssr_component(($$result, $$props, $$bindings, slot
   return ` ${building ? `${each(Array.from(new Set(data.map((row) => row[link]))), (href) => {
     return `<a${add_attribute("href", href, 0)} class="hidden" aria-hidden="true">${escape("")}</a>`;
   })}` : ``}`;
+});
+const CopyIcon = create_ssr_component(($$result, $$props, $$bindings, slots) => {
+  let labelled;
+  let attributes;
+  let $$restProps = compute_rest_props($$props, ["title"]);
+  let { title = void 0 } = $$props;
+  if ($$props.title === void 0 && $$bindings.title && title !== void 0)
+    $$bindings.title(title);
+  labelled = $$props["aria-label"] || $$props["aria-labelledby"] || title;
+  attributes = {
+    "aria-hidden": labelled ? void 0 : true,
+    role: labelled ? "img" : void 0,
+    focusable: Number($$props["tabindex"]) === 0 ? true : void 0
+  };
+  return `<svg${spread(
+    [
+      { xmlns: "http://www.w3.org/2000/svg" },
+      { viewBox: "0 0 32 32" },
+      { fill: "currentColor" },
+      { width: "100%" },
+      { height: "100%" },
+      { preserveAspectRatio: "xMidYMid meet" },
+      escape_object(attributes),
+      escape_object($$restProps)
+    ],
+    {}
+  )}>${title ? `<title>${escape(title)}</title>` : ``}<path d="M28,10V28H10V10H28m0-2H10a2,2,0,0,0-2,2V28a2,2,0,0,0,2,2H28a2,2,0,0,0,2-2V10a2,2,0,0,0-2-2Z"></path><path d="M4,18H2V4A2,2,0,0,1,4,2H18V4H4Z"></path></svg>`;
+});
+const CodeBlock = create_ssr_component(($$result, $$props, $$bindings, slots) => {
+  let { source } = $$props;
+  let { copyToClipboard = false } = $$props;
+  let { language = void 0 } = $$props;
+  if ($$props.source === void 0 && $$bindings.source && source !== void 0)
+    $$bindings.source(source);
+  if ($$props.copyToClipboard === void 0 && $$bindings.copyToClipboard && copyToClipboard !== void 0)
+    $$bindings.copyToClipboard(copyToClipboard);
+  if ($$props.language === void 0 && $$bindings.language && language !== void 0)
+    $$bindings.language(language);
+  return `<div class="my-5 bg-gray-50 border border-gray-200 rounded px-3 py-1 relative group">${copyToClipboard ? `<button${add_attribute("class", "absolute opacity-0 bg-gray-50 rounded-sm p-1 group-hover:opacity-100 top-4 right-6 h-6 w-6 z-10 transition-all duration-200 ease-in-out", 0)}>${`${validate_component(CopyIcon, "Copy").$$render($$result, {}, {}, {})}`}</button>` : ``} <pre class="overflow-auto max-h-64 pretty-scrollbar"><code class="${"language-" + escape(language, true) + " text-sm"}">${source ? `${escape(source)}` : `${slots.default ? slots.default({}) : ``}`}</code></pre></div>`;
 });
 function safeExtractColumn(column, columnSummary) {
   const foundCols = columnSummary.filter((d) => d.id === column.id);
@@ -84,13 +541,13 @@ function aggregateColumn(data, columnName, aggType, columnType, weightColumnName
   const columnValues = data.map((row) => row[columnName]).filter((val) => val !== void 0);
   switch (aggType) {
     case "sum":
-      return columnValues.reduce((sum, val) => sum + Number(val), 0);
+      return columnValues.reduce((sum2, val) => sum2 + Number(val), 0);
     case "min":
       return Math.min(...columnValues);
     case "max":
       return Math.max(...columnValues);
     case "mean":
-      return columnValues.length ? columnValues.reduce((sum, val) => sum + Number(val), 0) / columnValues.length : "-";
+      return columnValues.length ? columnValues.reduce((sum2, val) => sum2 + Number(val), 0) / columnValues.length : "-";
     case "count":
       return data.length;
     case "countDistinct":
@@ -99,10 +556,10 @@ function aggregateColumn(data, columnName, aggType, columnType, weightColumnName
       if (!weightColumnName)
         return "Weight column name required for weightedMean";
       let totalWeight = 0;
-      let weightedSum = data.reduce((sum, row) => {
+      let weightedSum = data.reduce((sum2, row) => {
         const weight = row[weightColumnName] || 0;
         totalWeight += weight;
-        return sum + (Number(row[columnName]) || 0) * weight;
+        return sum2 + (Number(row[columnName]) || 0) * weight;
       }, 0);
       return totalWeight > 0 ? weightedSum / totalWeight : null;
     }
@@ -119,6 +576,12 @@ function getFinalColumnOrder(columns, priorityColumns) {
   const restColumns = columns.filter((key) => !priorityColumns.includes(key));
   return [...priorityColumns, ...restColumns];
 }
+const ValueError = create_ssr_component(($$result, $$props, $$bindings, slots) => {
+  let { error = void 0 } = $$props;
+  if ($$props.error === void 0 && $$bindings.error && error !== void 0)
+    $$bindings.error(error);
+  return `<span class="group inline-flex items-center relative cursor-help cursor-helpfont-sans px-1 border border-red-200 py-[1px] bg-red-50 rounded"><span class="inline font-sans font-medium text-xs text-red-600" data-svelte-h="svelte-1927df">error</span> <span class="hidden text-white font-sans group-hover:inline absolute -top-1 left-[105%] text-sm z-10 px-2 py-1 bg-gray-800/80 leading-relaxed min-w-[150px] max-w-[400px] rounded-md">${escape(error)}</span></span>`;
+});
 const Delta = create_ssr_component(($$result, $$props, $$bindings, slots) => {
   let { data = void 0 } = $$props;
   let { row = 0 } = $$props;
@@ -256,6 +719,41 @@ const Delta = create_ssr_component(($$result, $$props, $$bindings, slots) => {
     "color": colorOptions[valueStatus].color
   })}><span${add_styles({ "text-align": align ?? "right" })}>${symbolPosition === "right" ? `${showValue ? `${selected_value === null ? `<span class="font-[system-ui]" data-svelte-h="svelte-45ueay">–</span>` : `<span>${escape(formatValue(selected_value, selected_format, columnUnitSummary))}</span>`}` : ``} ${showSymbol ? `<span class="font-[system-ui]"><!-- HTML_TAG_START -->${valueStatus === "positive" ? "&#9650;" : valueStatus === "negative" ? "&#9660;" : "–&thinsp;"}<!-- HTML_TAG_END --></span>` : ``}` : `${showSymbol ? `<span class="font-[system-ui]"><!-- HTML_TAG_START -->${valueStatus === "positive" ? "&#9650;" : valueStatus === "negative" ? "&#9660;" : "—"}<!-- HTML_TAG_END --></span>` : ``} ${showValue ? `${selected_value === null ? `<span class="font-[system-ui]" data-svelte-h="svelte-45ueay">–</span>` : `<span>${escape(formatValue(selected_value, selected_format, columnUnitSummary))}</span>`}` : ``}`} ${text ? `<span>${escape(text)}</span>` : ``}</span></span>` : `${validate_component(ValueError, "ValueError").$$render($$result, { error }, {}, {})}`}`;
 });
+const BigValueError = create_ssr_component(($$result, $$props, $$bindings, slots) => {
+  let { error } = $$props;
+  if ($$props.error === void 0 && $$bindings.error && error !== void 0)
+    $$bindings.error(error);
+  return `<div width="100%" class="inline-block group w-[100px] relative cursor-help cursor-helpfont-sans box-content grid-cols-1 justify-center bg-red-50 text-grey-700 font-ui font-normal rounded border border-red-200 h-[38px] mt-0.5 py-3 px-3 print:break-inside-avoid"><div class="font-bold text-center text-sm" data-svelte-h="svelte-f1i116">Big Value</div> <div class="m-auto w-[100px]"><div class="text-center [word-wrap:break-work] w-full font-medium text-xs text-red-600">error
+			<span class="hidden text-white font-sans group-hover:inline-block absolute top-[50%] left-[50%] text-sm z-10 px-2 py-1 bg-gray-800/80 leading-relaxed min-w-[150px] max-w-[400px] rounded-md z-50 overflow-visible">${escape(error)}</span></div></div></div>`;
+});
+const EmptyChart = create_ssr_component(($$result, $$props, $$bindings, slots) => {
+  let { isInitial = true } = $$props;
+  let { emptySet = "error" } = $$props;
+  let { emptyMessage = "No Records" } = $$props;
+  let { chartType: chartType2 = "Component" } = $$props;
+  let error = "Dataset is empty - query ran successfully, but no data was returned from the database";
+  if (chartType2 === "Big Value") {
+    error = "Dataset is empty";
+  }
+  if (emptySet === "error" && isInitial) {
+    const setTextRed = "\x1B[31m%s\x1B[0m";
+    console.error(setTextRed, `Error in ${chartType2}: ${error}`);
+    if (strictBuild) {
+      throw Error(error);
+    }
+  } else if (emptySet === "warn" && isInitial) {
+    console.warn(`Warning in ${chartType2}: Dataset is empty - query ran successfully, but no data was returned from the database`);
+  }
+  if ($$props.isInitial === void 0 && $$bindings.isInitial && isInitial !== void 0)
+    $$bindings.isInitial(isInitial);
+  if ($$props.emptySet === void 0 && $$bindings.emptySet && emptySet !== void 0)
+    $$bindings.emptySet(emptySet);
+  if ($$props.emptyMessage === void 0 && $$bindings.emptyMessage && emptyMessage !== void 0)
+    $$bindings.emptyMessage(emptyMessage);
+  if ($$props.chartType === void 0 && $$bindings.chartType && chartType2 !== void 0)
+    $$bindings.chartType(chartType2);
+  return `${["warn", "pass"].includes(emptySet) || !isInitial ? `${chartType2 === "Value" ? `<span class="text-xs text-gray-500 p-2 my-2 w-full border border-dashed rounded">${escape(emptyMessage)}</span>` : `${chartType2 === "Big Value" ? `<p class="text-xs text-gray-500 p-2 pt-[32px] my-0 text-center w-full align-middle h-[80px] border border-dashed rounded min-w-[120px]">${escape(emptyMessage)}</p>` : `<p class="text-xs text-gray-500 p-2 my-2 w-full border border-dashed rounded">${escape(emptyMessage)}</p>`}`}` : `${chartType2 === "Value" ? `${validate_component(ValueError, "ValueError").$$render($$result, { error }, {}, {})}` : `${chartType2 === "Big Value" ? `${validate_component(BigValueError, "BigValueError").$$render($$result, { error }, {}, {})}` : `${validate_component(ErrorChart, "ErrorChart").$$render($$result, { chartType: chartType2, error }, {}, {})}`}`}`}`;
+});
 const { Object: Object_1$2 } = globals;
 let chartType$1 = "Delta";
 const Delta_1 = create_ssr_component(($$result, $$props, $$bindings, slots) => {
@@ -387,6 +885,82 @@ const TableCell = create_ssr_component(($$result, $$props, $$bindings, slots) =>
     "border-bottom": borderBottom
   })}>${slots.default ? slots.default({}) : ``} </td>`;
 });
+const uiColours = {
+  blue100: "hsla(202, 100%, 95%, 1)",
+  blue200: "hsla(204, 100%, 85%, 1)",
+  blue300: "hsla(206, 95%, 72%, 1)",
+  blue400: "hsla(208, 90%, 63%, 1)",
+  blue500: "hsla(210, 85%, 54%, 1)",
+  blue600: "hsla(212, 96%, 44%, 1)",
+  blue700: "hsla(214, 98%, 38%, 1)",
+  blue800: "hsla(217, 98%, 33%, 1)",
+  blue900: "hsla(220, 99%, 24%, 1)",
+  blue999: "hsla(222, 100%, 18%, 1)",
+  bluelink: "hsla(205, 62%, 38%, 1)",
+  green100: "hsla(167, 100%, 94%, 1)",
+  green200: "hsla(166, 100%, 87%, 1)",
+  green300: "hsla(163, 93%, 76%, 1)",
+  green400: "hsla(161, 90%, 63%, 1)",
+  green500: "hsla(159, 88%, 44%, 1)",
+  green600: "hsla(158, 91%, 35%, 1)",
+  green700: "hsla(156, 93%, 28%, 1)",
+  green800: "hsla(154, 95%, 23%, 1)",
+  green900: "hsla(152, 100%, 18%, 1)",
+  green999: "hsla(150, 100%, 14%, 1)",
+  grey100: "hsla(217, 33%, 97%, 1)",
+  grey200: "hsla(215, 15%, 91%, 1)",
+  grey300: "hsla(211, 16%, 82%, 1)",
+  grey400: "hsla(212, 13%, 65%, 1)",
+  grey500: "hsla(212, 10%, 53%, 1)",
+  grey600: "hsla(212, 12%, 43%, 1)",
+  grey700: "hsla(210, 14%, 37%, 1)",
+  grey800: "hsla(210, 18%, 30%, 1)",
+  grey900: "hsla(210, 20%, 25%, 1)",
+  grey999: "hsla(211, 24%, 16%, 1)",
+  yellow100: "hsl(49, 100%, 96%, 1)",
+  yellow200: "hsl(48, 100%, 88%, 1)",
+  yellow300: "hsl(48, 95%, 76%, 1)",
+  yellow400: "hsl(48, 94%, 68%, 1)",
+  yellow500: "hsl(44, 92%, 63%, 1)",
+  yellow600: "hsl(42, 87%, 55%, 1)",
+  yellow700: "hsl(36, 77%, 49%, 1)",
+  yellow800: "hsl(29, 80%, 44%, 1)",
+  yellow900: "hsl(22, 82%, 39%, 1)",
+  yellow999: "hsl(15, 86%, 30%, 1)"
+};
+const chartColours = [
+  "hsla(207, 65%, 39%, 1)",
+  // Navy
+  "hsla(195, 49%, 51%, 1)",
+  // Teal
+  "hsla(207, 69%, 79%, 1)",
+  // Light Blue
+  "hsla(202, 28%, 65%, 1)",
+  // Grey
+  "hsla(179, 37%, 65%, 1)",
+  // Light Green
+  "hsla(40, 30%, 75%, 1)",
+  // Tan
+  "hsla(38, 89%, 62%, 1)",
+  // Yellow
+  "hsla(342, 40%, 40%, 1)",
+  // Maroon
+  "hsla(207, 86%, 70%, 1)",
+  // Blue
+  "hsla(160, 40%, 46%, 1)",
+  // Green
+  // Grey Scale
+  "#71777d",
+  "#7e848a",
+  "#8c9196",
+  "#9a9fa3",
+  "#a8acb0",
+  "#b7babd",
+  "#c5c8ca",
+  "#d4d6d7",
+  "#e3e4e5",
+  "#f3f3f3"
+];
 const css$5 = {
   code: ".row-lines.svelte-1ukk5on{border-bottom:thin solid var(--grey-200)}.shaded-row.svelte-1ukk5on{background-color:var(--grey-50)}.svelte-1ukk5on:focus{outline:none}.row-link.svelte-1ukk5on{cursor:pointer}.row-link.svelte-1ukk5on:hover{--tw-bg-opacity:1;background-color:rgb(239 246 255 / var(--tw-bg-opacity))}",
   map: `{"version":3,"file":"TableRow.svelte","sources":["TableRow.svelte"],"sourcesContent":["<script>\\n\\timport { safeExtractColumn } from './datatable.js';\\n\\timport Delta from '../core/Delta.svelte';\\n\\timport {\\n\\t\\tformatValue,\\n\\t\\tgetFormatObjectFromString\\n\\t} from '@evidence-dev/component-utilities/formatting';\\n\\timport { getContext } from 'svelte';\\n\\timport { propKey } from '@evidence-dev/component-utilities/chartContext';\\n\\timport TableCell from './TableCell.svelte';\\n\\timport chroma from 'chroma-js';\\n\\timport { uiColours } from '@evidence-dev/component-utilities/colours';\\n\\n\\tconst props = getContext(propKey);\\n\\n\\texport let displayedData = undefined;\\n\\texport let rowShading = undefined;\\n\\texport let link = undefined;\\n\\texport let rowNumbers = undefined;\\n\\texport let rowLines = undefined;\\n\\texport let index = undefined;\\n\\texport let columnSummary = undefined;\\n\\texport let grouped = false; // if part of a group - styling will be adjusted\\n\\texport let groupType = undefined;\\n\\texport let groupColumn = undefined;\\n\\texport let rowSpan = undefined;\\n\\texport let groupNamePosition = 'middle'; // middle (default) | top | bottom\\n\\texport let finalColumnOrder = undefined;\\n\\texport let compact = undefined;\\n\\n\\tfunction handleRowClick(url) {\\n\\t\\tif (link) {\\n\\t\\t\\twindow.location = url;\\n\\t\\t}\\n\\t}\\n<\/script>\\n\\n{#each displayedData as row, i}\\n\\t<tr\\n\\t\\tclass:shaded-row={rowShading && i % 2 === 1}\\n\\t\\tclass:row-link={link != undefined}\\n\\t\\ton:click={() => handleRowClick(row[link])}\\n\\t\\tclass:row-lines={rowLines}\\n\\t>\\n\\t\\t{#if rowNumbers && groupType !== 'section'}\\n\\t\\t\\t<TableCell class={'index w-[2%]'} {compact}>\\n\\t\\t\\t\\t{#if i === 0}\\n\\t\\t\\t\\t\\t{(index + i + 1).toLocaleString()}\\n\\t\\t\\t\\t{:else}\\n\\t\\t\\t\\t\\t{(index + i + 1).toLocaleString()}\\n\\t\\t\\t\\t{/if}\\n\\t\\t\\t</TableCell>\\n\\t\\t{/if}\\n\\n\\t\\t{#if $props.columns.length > 0}\\n\\t\\t\\t{#each $props.columns.sort((a, b) => finalColumnOrder.indexOf(a.id) - finalColumnOrder.indexOf(b.id)) as column, k}\\n\\t\\t\\t\\t{@const useCol = safeExtractColumn(column, columnSummary)}\\n\\t\\t\\t\\t{@const scaleCol = column.scaleColumn\\n\\t\\t\\t\\t\\t? columnSummary.find((d) => d.id === column.scaleColumn)\\n\\t\\t\\t\\t\\t: useCol}\\n\\t\\t\\t\\t{@const column_min = column.colorMin ?? scaleCol.columnUnitSummary?.min}\\n\\t\\t\\t\\t{@const column_max = column.colorMax ?? scaleCol.columnUnitSummary?.max}\\n\\t\\t\\t\\t{@const is_nonzero =\\n\\t\\t\\t\\t\\tcolumn_max - column_min !== 0 && !isNaN(column_max) && !isNaN(column_min)}\\n\\t\\t\\t\\t{@const column_format = column.fmt\\n\\t\\t\\t\\t\\t? getFormatObjectFromString(column.fmt, useCol.format?.valueType)\\n\\t\\t\\t\\t\\t: column.fmtColumn\\n\\t\\t\\t\\t\\t\\t? getFormatObjectFromString(row[column.fmtColumn], useCol.format?.valuetype)\\n\\t\\t\\t\\t\\t\\t: useCol.format}\\n\\t\\t\\t\\t{@const color_domain =\\n\\t\\t\\t\\t\\tcolumn.colorBreakpoints ??\\n\\t\\t\\t\\t\\t(column.colorMid ? [column_min, column.colorMid, column_max] : [column_min, column_max])}\\n\\t\\t\\t\\t{@const color_scale = column.colorPalette\\n\\t\\t\\t\\t\\t? chroma.scale(column.colorPalette).domain(color_domain).nodata('white')\\n\\t\\t\\t\\t\\t: ''}\\n\\t\\t\\t\\t{@const cell_color =\\n\\t\\t\\t\\t\\tcolumn.contentType === 'colorscale' && is_nonzero && column.colorPalette\\n\\t\\t\\t\\t\\t\\t? column.scaleColumn\\n\\t\\t\\t\\t\\t\\t\\t? color_scale(row[column.scaleColumn]).hex()\\n\\t\\t\\t\\t\\t\\t\\t: color_scale(row[column.id]).hex()\\n\\t\\t\\t\\t\\t\\t: ''}\\n\\t\\t\\t\\t{@const font_color = column.redNegatives\\n\\t\\t\\t\\t\\t? row[column.id] < 0\\n\\t\\t\\t\\t\\t\\t? 'rgb(220 38 38)'\\n\\t\\t\\t\\t\\t\\t: ''\\n\\t\\t\\t\\t\\t: column.contentType === 'colorscale' && is_nonzero && column.colorPalette\\n\\t\\t\\t\\t\\t\\t? chroma.contrast(cell_color, uiColours.grey999) <\\n\\t\\t\\t\\t\\t\\t\\tchroma.contrast(cell_color, 'white') + 0.5\\n\\t\\t\\t\\t\\t\\t\\t? 'white'\\n\\t\\t\\t\\t\\t\\t\\t: uiColours.grey999\\n\\t\\t\\t\\t\\t\\t: ''}\\n\\t\\t\\t\\t{@const bottom_border =\\n\\t\\t\\t\\t\\ti !== displayedData.length - 1 &&\\n\\t\\t\\t\\t\\trowLines &&\\n\\t\\t\\t\\t\\tcolumn.contentType === 'colorscale' &&\\n\\t\\t\\t\\t\\tis_nonzero &&\\n\\t\\t\\t\\t\\tcolumn.colorPalette\\n\\t\\t\\t\\t\\t\\t? \`1px solid \${chroma(cell_color).darken(0.5)}\`\\n\\t\\t\\t\\t\\t\\t: ''}\\n\\t\\t\\t\\t<TableCell\\n\\t\\t\\t\\t\\tclass={useCol?.type}\\n\\t\\t\\t\\t\\t{compact}\\n\\t\\t\\t\\t\\tverticalAlign={groupType === 'section' ? groupNamePosition : undefined}\\n\\t\\t\\t\\t\\trowSpan={groupType === 'section' && groupColumn === useCol.id && i === 0 ? rowSpan : 1}\\n\\t\\t\\t\\t\\tshow={!(groupType === 'section' && groupColumn === useCol.id && i !== 0)}\\n\\t\\t\\t\\t\\talign={column.align}\\n\\t\\t\\t\\t\\tpaddingLeft={k === 0 && grouped && groupType === 'accordion' && !rowNumbers\\n\\t\\t\\t\\t\\t\\t? '28px'\\n\\t\\t\\t\\t\\t\\t: undefined}\\n\\t\\t\\t\\t\\theight={column.height}\\n\\t\\t\\t\\t\\twidth={column.width}\\n\\t\\t\\t\\t\\twrap={column.wrap}\\n\\t\\t\\t\\t\\tcellColor={cell_color}\\n\\t\\t\\t\\t\\tfontColor={font_color}\\n\\t\\t\\t\\t\\tborderBottom={bottom_border}\\n\\t\\t\\t\\t>\\n\\t\\t\\t\\t\\t{#if column.contentType === 'image' && row[column.id] !== undefined}\\n\\t\\t\\t\\t\\t\\t<img\\n\\t\\t\\t\\t\\t\\t\\tsrc={row[column.id]}\\n\\t\\t\\t\\t\\t\\t\\talt={column.alt\\n\\t\\t\\t\\t\\t\\t\\t\\t? row[column.alt]\\n\\t\\t\\t\\t\\t\\t\\t\\t: row[column.id].replace(/^(.*[/])/g, '').replace(/[.][^.]+$/g, '')}\\n\\t\\t\\t\\t\\t\\t\\tclass=\\"mx-auto my-2 max-w-[unset] rounded-[unset]\\"\\n\\t\\t\\t\\t\\t\\t\\tstyle:height={column.height}\\n\\t\\t\\t\\t\\t\\t\\tstyle:width={column.width}\\n\\t\\t\\t\\t\\t\\t/>\\n\\t\\t\\t\\t\\t{:else if column.contentType === 'link' && row[column.id] !== undefined}\\n\\t\\t\\t\\t\\t\\t<!-- if \`column.linkLabel\` is a column in \`row\`, but undefined, display - -->\\n\\t\\t\\t\\t\\t\\t{#if column.linkLabel != undefined && row[column.linkLabel] == undefined && column.linkLabel in row}\\n\\t\\t\\t\\t\\t\\t\\t-\\n\\t\\t\\t\\t\\t\\t{:else}\\n\\t\\t\\t\\t\\t\\t\\t<a\\n\\t\\t\\t\\t\\t\\t\\t\\thref={row[column.id]}\\n\\t\\t\\t\\t\\t\\t\\t\\ttarget={column.openInNewTab ? '_blank' : ''}\\n\\t\\t\\t\\t\\t\\t\\t\\tclass=\\"text-blue-600 hover:text-blue-700 transition-colors duration-200\\"\\n\\t\\t\\t\\t\\t\\t\\t>\\n\\t\\t\\t\\t\\t\\t\\t\\t{#if column.linkLabel != undefined}\\n\\t\\t\\t\\t\\t\\t\\t\\t\\t<!-- if the linklabel is a column name, display that column -->\\n\\t\\t\\t\\t\\t\\t\\t\\t\\t{#if row[column.linkLabel] != undefined}\\n\\t\\t\\t\\t\\t\\t\\t\\t\\t\\t{@const labelSummary = safeExtractColumn(\\n\\t\\t\\t\\t\\t\\t\\t\\t\\t\\t\\t{ id: column.linkLabel },\\n\\t\\t\\t\\t\\t\\t\\t\\t\\t\\t\\tcolumnSummary\\n\\t\\t\\t\\t\\t\\t\\t\\t\\t\\t)}\\n\\t\\t\\t\\t\\t\\t\\t\\t\\t\\t{formatValue(\\n\\t\\t\\t\\t\\t\\t\\t\\t\\t\\t\\trow[column.linkLabel],\\n\\t\\t\\t\\t\\t\\t\\t\\t\\t\\t\\tcolumn.fmt\\n\\t\\t\\t\\t\\t\\t\\t\\t\\t\\t\\t\\t? getFormatObjectFromString(column.fmt, labelSummary.format?.valueType)\\n\\t\\t\\t\\t\\t\\t\\t\\t\\t\\t\\t\\t: labelSummary.format,\\n\\t\\t\\t\\t\\t\\t\\t\\t\\t\\t\\tlabelSummary.columnUnitSummary\\n\\t\\t\\t\\t\\t\\t\\t\\t\\t\\t)}\\n\\t\\t\\t\\t\\t\\t\\t\\t\\t\\t<!-- otherwise, consider it a label (like Details ->) and display it -->\\n\\t\\t\\t\\t\\t\\t\\t\\t\\t{:else}\\n\\t\\t\\t\\t\\t\\t\\t\\t\\t\\t{column.linkLabel}\\n\\t\\t\\t\\t\\t\\t\\t\\t\\t{/if}\\n\\t\\t\\t\\t\\t\\t\\t\\t{:else}\\n\\t\\t\\t\\t\\t\\t\\t\\t\\t<!-- if no linkLabel is specified, display the link itself -->\\n\\t\\t\\t\\t\\t\\t\\t\\t\\t{@const columnSummary = useCol}\\n\\t\\t\\t\\t\\t\\t\\t\\t\\t{formatValue(\\n\\t\\t\\t\\t\\t\\t\\t\\t\\t\\trow[column.id],\\n\\t\\t\\t\\t\\t\\t\\t\\t\\t\\tcolumn.fmt\\n\\t\\t\\t\\t\\t\\t\\t\\t\\t\\t\\t? getFormatObjectFromString(column.fmt, columnSummary.format?.valueType)\\n\\t\\t\\t\\t\\t\\t\\t\\t\\t\\t\\t: columnSummary.format,\\n\\t\\t\\t\\t\\t\\t\\t\\t\\t\\tcolumnSummary.columnUnitSummary\\n\\t\\t\\t\\t\\t\\t\\t\\t\\t)}\\n\\t\\t\\t\\t\\t\\t\\t\\t{/if}\\n\\t\\t\\t\\t\\t\\t\\t</a>\\n\\t\\t\\t\\t\\t\\t{/if}\\n\\t\\t\\t\\t\\t{:else if column.contentType === 'delta' && row[column.id] !== undefined}\\n\\t\\t\\t\\t\\t\\t<Delta\\n\\t\\t\\t\\t\\t\\t\\tvalue={row[column.id]}\\n\\t\\t\\t\\t\\t\\t\\tdownIsGood={column.downIsGood}\\n\\t\\t\\t\\t\\t\\t\\tformat_object={column_format}\\n\\t\\t\\t\\t\\t\\t\\tcolumnUnitSummary={useCol.columnUnitSummary}\\n\\t\\t\\t\\t\\t\\t\\tshowValue={column.showValue}\\n\\t\\t\\t\\t\\t\\t\\tshowSymbol={column.deltaSymbol}\\n\\t\\t\\t\\t\\t\\t\\talign={column.align}\\n\\t\\t\\t\\t\\t\\t\\tfontClass=\\"text-[9.25pt]\\"\\n\\t\\t\\t\\t\\t\\t\\tneutralMin={column.neutralMin}\\n\\t\\t\\t\\t\\t\\t\\tneutralMax={column.neutralMax}\\n\\t\\t\\t\\t\\t\\t\\tchip={column.chip}\\n\\t\\t\\t\\t\\t\\t/>\\n\\t\\t\\t\\t\\t{:else if column.contentType === 'html' && row[column.id] !== undefined}\\n\\t\\t\\t\\t\\t\\t{@html row[column.id]}\\n\\t\\t\\t\\t\\t{:else}\\n\\t\\t\\t\\t\\t\\t{formatValue(row[column.id], column_format, useCol.columnUnitSummary)}\\n\\t\\t\\t\\t\\t{/if}\\n\\t\\t\\t\\t</TableCell>\\n\\t\\t\\t{/each}\\n\\t\\t{:else}\\n\\t\\t\\t{#each columnSummary\\n\\t\\t\\t\\t.filter((d) => d.show === true)\\n\\t\\t\\t\\t.sort((a, b) => finalColumnOrder.indexOf(a.id) - finalColumnOrder.indexOf(b.id)) as column, j}\\n\\t\\t\\t\\t<!-- Check if last row in table-->\\n\\t\\t\\t\\t<TableCell\\n\\t\\t\\t\\t\\tclass={column.type}\\n\\t\\t\\t\\t\\t{compact}\\n\\t\\t\\t\\t\\trowSpan={groupType === 'section' && groupColumn === column.id && i === 0 ? rowSpan : 1}\\n\\t\\t\\t\\t\\tshow={!(groupType === 'section' && groupColumn === column.id && i !== 0)}\\n\\t\\t\\t\\t\\tpaddingLeft={j === 0 && grouped && groupType === 'accordion' && !rowNumbers\\n\\t\\t\\t\\t\\t\\t? '28px'\\n\\t\\t\\t\\t\\t\\t: undefined}\\n\\t\\t\\t\\t>\\n\\t\\t\\t\\t\\t{formatValue(row[column.id], column.format, column.columnUnitSummary)}\\n\\t\\t\\t\\t</TableCell>\\n\\t\\t\\t{/each}\\n\\t\\t{/if}\\n\\t</tr>\\n{/each}\\n\\n<style>\\n\\t.row-lines {\\n\\t\\tborder-bottom: thin solid var(--grey-200);\\n\\t}\\n\\n\\t.shaded-row {\\n\\t\\tbackground-color: var(--grey-50);\\n\\t}\\n\\n\\t*:focus {\\n\\t\\toutline: none;\\n\\t}\\n\\n\\t.row-link {\\n\\t\\tcursor: pointer;\\n\\t}\\n\\n\\t.row-link:hover {\\n\\t\\t--tw-bg-opacity: 1;\\n\\t\\tbackground-color: rgb(239 246 255 / var(--tw-bg-opacity));\\n\\t}</style>\\n"],"names":[],"mappings":"AAkNC,yBAAW,CACV,aAAa,CAAE,IAAI,CAAC,KAAK,CAAC,IAAI,UAAU,CACzC,CAEA,0BAAY,CACX,gBAAgB,CAAE,IAAI,SAAS,CAChC,CAEA,eAAC,MAAO,CACP,OAAO,CAAE,IACV,CAEA,wBAAU,CACT,MAAM,CAAE,OACT,CAEA,wBAAS,MAAO,CACf,eAAe,CAAE,CAAC,CAClB,gBAAgB,CAAE,IAAI,GAAG,CAAC,GAAG,CAAC,GAAG,CAAC,CAAC,CAAC,IAAI,eAAe,CAAC,CACzD"}`
@@ -1216,7 +1790,7 @@ const DataTable = create_ssr_component(($$result, $$props, $$bindings, slots) =>
   let displayedData = filteredData;
   let pageCount;
   let currentPage = 1;
-  let max;
+  let max2;
   let displayedPageLength = 0;
   let tableData;
   let groupedData = {};
@@ -1374,8 +1948,8 @@ const DataTable = create_ssr_component(($$result, $$props, $$bindings, slots) =>
     };
     goToPage = (pageNumber) => {
       index = pageNumber * rows;
-      max = index + rows;
-      currentPage = Math.ceil(max / rows);
+      max2 = index + rows;
+      currentPage = Math.ceil(max2 / rows);
       totalRows = filteredData.length;
       displayedData = filteredData.slice(index, index + rows);
     };
@@ -1757,7 +2331,28 @@ const DataTable_1 = create_ssr_component(($$result, $$props, $$bindings, slots) 
   })}`;
 });
 export {
-  Column as C,
+  BigValueError as B,
+  CodeBlock as C,
   DataTable_1 as D,
-  Delta_1 as a
+  EmptyChart as E,
+  QueryLoad as Q,
+  ValueError as V,
+  DownloadData as a,
+  checkInputs as b,
+  configKey as c,
+  getFormatObjectFromString as d,
+  formatTitle as e,
+  formatValue as f,
+  getColumnSummary as g,
+  formatAxisValue as h,
+  chartColours as i,
+  strictBuild as j,
+  ErrorChart as k,
+  globals as l,
+  convertColumnToDate as m,
+  Delta_1 as n,
+  Column as o,
+  propKey as p,
+  standardizeDateColumn as s,
+  uiColours as u
 };

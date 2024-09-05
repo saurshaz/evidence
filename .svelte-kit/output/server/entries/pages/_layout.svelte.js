@@ -1,5 +1,5 @@
-import { g as getContext, s as setContext, c as create_ssr_component, a as spread, e as escape_attribute_value, b as escape_object, d as add_attribute, f as createEventDispatcher, h as escape, i as each, v as validate_component, o as onDestroy } from "../../chunks/ssr.js";
-import { i as isBrowser, a as isHTMLElement, w as withGet, m as makeElement, s as styleToString, p as portalAttr, e as effect, t as tick, b as executeCallbacks, c as addMeltEventListener, F as FIRST_LAST_KEYS, k as kbd, S as SELECTION_KEYS, u as useEscapeKeydown, n as noop, d as isElementDisabled, f as safeOnMount, g as addEventListener, h as createElHelpers, j as disabledAttr, o as omit, l as cn, q as flyAndScale, I as Icon } from "../../chunks/VennDiagram.svelte_svelte_type_style_lang.js";
+import { c as create_ssr_component, a as spread, e as escape_attribute_value, b as escape_object, d as add_attribute, g as getContext, s as setContext, v as validate_component, f as createEventDispatcher, h as escape, i as each, o as onDestroy } from "../../chunks/ssr.js";
+import { n as noop, i as isBrowser, a as isHTMLElement, w as withGet, b as isFunction, c as isElement, u as useEscapeKeydown, e as executeCallbacks, d as addEventListener, m as makeElement, s as styleToString, p as portalAttr, f as effect, g as addMeltEventListener, F as FIRST_LAST_KEYS, k as kbd, S as SELECTION_KEYS, h as isElementDisabled, j as safeOnMount, l as createElHelpers, o as disabledAttr, q as omit, r as cn, t as buttonVariants, v as flyAndScale, I as Icon } from "../../chunks/VennDiagram.svelte_svelte_type_style_lang.js";
 import { t as toasts, s as showQueries } from "../../chunks/stores.js";
 import "@evidence-dev/sdk/usql";
 import "ssf";
@@ -19,20 +19,34 @@ import { g as get_store_value, c as compute_rest_props, s as subscribe, n as nul
 import { p as page, n as navigating } from "../../chunks/stores2.js";
 import { d as dev } from "../../chunks/index3.js";
 import { D as Dots, X, M as Menu2, C as ChevronRight } from "../../chunks/index4.js";
-import { t as toWritableStores, g as generateIds, o as overridable, c as createBitAttrs, r as removeUndefined, a as getOptionUpdater, b as createDispatcher, d as disabledAttrs } from "../../chunks/updater.js";
-import { w as writable, d as derived } from "../../chunks/index2.js";
-import { s as sleep, w as wrapArray, d as derivedVisible, u as usePopper, g as getPortalDestination, a as usePortal, c as createSeparator, h as handleFocus, r as removeScroll, b as getPositioningUpdater, i as is_void, B as Button } from "../../chunks/button.js";
+import { t as tick, a as toWritableStores, g as generateIds, o as overridable, c as createBitAttrs, r as removeUndefined, b as getOptionUpdater, d as createDispatcher, e as disabledAttrs } from "../../chunks/updater.js";
+import { d as derived, w as writable, a as readonly } from "../../chunks/index2.js";
+import { flip, offset, shift, arrow, size, autoUpdate, computePosition } from "@floating-ui/dom";
+import { createFocusTrap as createFocusTrap$1 } from "focus-trap";
 import { nanoid } from "nanoid/non-secure";
 import "echarts";
 import "debounce";
 import "downloadjs";
 import "echarts-stat";
 import "@evidence-dev/sdk/utils";
+const void_element_names = /^(?:area|base|br|col|command|embed|hr|img|input|keygen|link|meta|param|source|track|wbr)$/;
+function is_void(name) {
+  return void_element_names.test(name) || name.toLowerCase() === "!doctype";
+}
+function last(array) {
+  return array[array.length - 1];
+}
+function wrapArray(array, startIndex) {
+  return array.map((_, index) => array[(startIndex + index) % array.length]);
+}
 function addHighlight(element) {
   element.setAttribute("data-highlighted", "");
 }
 function removeHighlight(element) {
   element.removeAttribute("data-highlighted");
+}
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 function debounce(fn, wait = 500) {
   let timeout = null;
@@ -44,6 +58,87 @@ function debounce(fn, wait = 500) {
     timeout && clearTimeout(timeout);
     timeout = setTimeout(later, wait);
   };
+}
+const isDom = () => typeof window !== "undefined";
+function getPlatform() {
+  const agent = navigator.userAgentData;
+  return agent?.platform ?? navigator.platform;
+}
+const pt = (v) => isDom() && v.test(getPlatform().toLowerCase());
+const isTouchDevice = () => isDom() && !!navigator.maxTouchPoints;
+const isMac = () => pt(/^mac/) && !isTouchDevice();
+const isApple = () => pt(/mac|iphone|ipad|ipod/i);
+const isIos = () => isApple() && !isMac();
+const LOCK_CLASSNAME = "data-melt-scroll-lock";
+function assignStyle(el, style) {
+  if (!el)
+    return;
+  const previousStyle = el.style.cssText;
+  Object.assign(el.style, style);
+  return () => {
+    el.style.cssText = previousStyle;
+  };
+}
+function setCSSProperty(el, property, value) {
+  if (!el)
+    return;
+  const previousValue = el.style.getPropertyValue(property);
+  el.style.setProperty(property, value);
+  return () => {
+    if (previousValue) {
+      el.style.setProperty(property, previousValue);
+    } else {
+      el.style.removeProperty(property);
+    }
+  };
+}
+function getPaddingProperty(documentElement) {
+  const documentLeft = documentElement.getBoundingClientRect().left;
+  const scrollbarX = Math.round(documentLeft) + documentElement.scrollLeft;
+  return scrollbarX ? "paddingLeft" : "paddingRight";
+}
+function removeScroll(_document) {
+  const doc = document;
+  const win = doc.defaultView ?? window;
+  const { documentElement, body } = doc;
+  const locked = body.hasAttribute(LOCK_CLASSNAME);
+  if (locked)
+    return noop;
+  body.setAttribute(LOCK_CLASSNAME, "");
+  const scrollbarWidth = win.innerWidth - documentElement.clientWidth;
+  const setScrollbarWidthProperty = () => setCSSProperty(documentElement, "--scrollbar-width", `${scrollbarWidth}px`);
+  const paddingProperty = getPaddingProperty(documentElement);
+  const scrollbarSidePadding = win.getComputedStyle(body)[paddingProperty];
+  const setStyle = () => assignStyle(body, {
+    overflow: "hidden",
+    [paddingProperty]: `calc(${scrollbarSidePadding} + ${scrollbarWidth}px)`
+  });
+  const setIOSStyle = () => {
+    const { scrollX, scrollY, visualViewport } = win;
+    const offsetLeft = visualViewport?.offsetLeft ?? 0;
+    const offsetTop = visualViewport?.offsetTop ?? 0;
+    const restoreStyle = assignStyle(body, {
+      position: "fixed",
+      overflow: "hidden",
+      top: `${-(scrollY - Math.floor(offsetTop))}px`,
+      left: `${-(scrollX - Math.floor(offsetLeft))}px`,
+      right: "0",
+      [paddingProperty]: `calc(${scrollbarSidePadding} + ${scrollbarWidth}px)`
+    });
+    return () => {
+      restoreStyle?.();
+      win.scrollTo(scrollX, scrollY);
+    };
+  };
+  const cleanups = [setScrollbarWidthProperty(), isIos() ? setIOSStyle() : setStyle()];
+  return () => {
+    cleanups.forEach((fn) => fn?.());
+    body.removeAttribute(LOCK_CLASSNAME);
+  };
+}
+function derivedVisible(obj) {
+  const { open, forceVisible, activeTrigger } = obj;
+  return derived([open, forceVisible, activeTrigger], ([$open, $forceVisible, $activeTrigger]) => ($open || $forceVisible) && $activeTrigger !== null);
 }
 function handleRovingFocus(nextElement) {
   if (!isBrowser)
@@ -83,12 +178,12 @@ function getPreviousFocusable(currentElement) {
   return null;
 }
 const ignoredKeys = /* @__PURE__ */ new Set(["Shift", "Control", "Alt", "Meta", "CapsLock", "NumLock"]);
-const defaults$2 = {
+const defaults$3 = {
   onMatch: handleRovingFocus,
   getCurrentItem: () => document.activeElement
 };
 function createTypeaheadSearch(args = {}) {
-  const withDefaults = { ...defaults$2, ...args };
+  const withDefaults = { ...defaults$3, ...args };
   const typed = withGet(writable([]));
   const resetTyped = debounce(() => {
     typed.update(() => []);
@@ -129,6 +224,464 @@ function createTypeaheadSearch(args = {}) {
     handleTypeaheadSearch
   };
 }
+function getPortalParent(node) {
+  let parent = node.parentElement;
+  while (isHTMLElement(parent) && !parent.hasAttribute("data-portal")) {
+    parent = parent.parentElement;
+  }
+  return parent || "body";
+}
+function getPortalDestination(node, portalProp) {
+  if (portalProp !== void 0)
+    return portalProp;
+  const portalParent = getPortalParent(node);
+  if (portalParent === "body")
+    return document.body;
+  return null;
+}
+async function handleFocus(args) {
+  const { prop, defaultEl } = args;
+  await Promise.all([sleep(1), tick]);
+  if (prop === void 0) {
+    defaultEl?.focus();
+    return;
+  }
+  const returned = isFunction(prop) ? prop(defaultEl) : prop;
+  if (typeof returned === "string") {
+    const el = document.querySelector(returned);
+    if (!isHTMLElement(el))
+      return;
+    el.focus();
+  } else if (isHTMLElement(returned)) {
+    returned.focus();
+  }
+}
+const defaultConfig$1 = {
+  strategy: "absolute",
+  placement: "top",
+  gutter: 5,
+  flip: true,
+  sameWidth: false,
+  overflowPadding: 8
+};
+const ARROW_TRANSFORM = {
+  bottom: "rotate(45deg)",
+  left: "rotate(135deg)",
+  top: "rotate(225deg)",
+  right: "rotate(315deg)"
+};
+function useFloating(reference, floating, opts = {}) {
+  if (!floating || !reference || opts === null)
+    return {
+      destroy: noop
+    };
+  const options = { ...defaultConfig$1, ...opts };
+  const arrowEl = floating.querySelector("[data-arrow=true]");
+  const middleware = [];
+  if (options.flip) {
+    middleware.push(flip({
+      boundary: options.boundary,
+      padding: options.overflowPadding
+    }));
+  }
+  const arrowOffset = isHTMLElement(arrowEl) ? arrowEl.offsetHeight / 2 : 0;
+  if (options.gutter || options.offset) {
+    const data = options.gutter ? { mainAxis: options.gutter } : options.offset;
+    if (data?.mainAxis != null) {
+      data.mainAxis += arrowOffset;
+    }
+    middleware.push(offset(data));
+  }
+  middleware.push(shift({
+    boundary: options.boundary,
+    crossAxis: options.overlap,
+    padding: options.overflowPadding
+  }));
+  if (arrowEl) {
+    middleware.push(arrow({ element: arrowEl, padding: 8 }));
+  }
+  middleware.push(size({
+    padding: options.overflowPadding,
+    apply({ rects, availableHeight, availableWidth }) {
+      if (options.sameWidth) {
+        Object.assign(floating.style, {
+          width: `${Math.round(rects.reference.width)}px`,
+          minWidth: "unset"
+        });
+      }
+      if (options.fitViewport) {
+        Object.assign(floating.style, {
+          maxWidth: `${availableWidth}px`,
+          maxHeight: `${availableHeight}px`
+        });
+      }
+    }
+  }));
+  function compute() {
+    if (!reference || !floating)
+      return;
+    if (isHTMLElement(reference) && !reference.ownerDocument.documentElement.contains(reference))
+      return;
+    const { placement, strategy } = options;
+    computePosition(reference, floating, {
+      placement,
+      middleware,
+      strategy
+    }).then((data) => {
+      const x = Math.round(data.x);
+      const y = Math.round(data.y);
+      const [side, align] = getSideAndAlignFromPlacement(data.placement);
+      floating.setAttribute("data-side", side);
+      floating.setAttribute("data-align", align);
+      Object.assign(floating.style, {
+        position: options.strategy,
+        top: `${y}px`,
+        left: `${x}px`
+      });
+      if (isHTMLElement(arrowEl) && data.middlewareData.arrow) {
+        const { x: x2, y: y2 } = data.middlewareData.arrow;
+        const dir = data.placement.split("-")[0];
+        arrowEl.setAttribute("data-side", dir);
+        Object.assign(arrowEl.style, {
+          position: "absolute",
+          left: x2 != null ? `${x2}px` : "",
+          top: y2 != null ? `${y2}px` : "",
+          [dir]: `calc(100% - ${arrowOffset}px)`,
+          transform: ARROW_TRANSFORM[dir],
+          backgroundColor: "inherit",
+          zIndex: "inherit"
+        });
+      }
+      return data;
+    });
+  }
+  Object.assign(floating.style, {
+    position: options.strategy
+  });
+  return {
+    destroy: autoUpdate(reference, floating, compute)
+  };
+}
+function getSideAndAlignFromPlacement(placement) {
+  const [side, align = "center"] = placement.split("-");
+  return [side, align];
+}
+function createFocusTrap(config = {}) {
+  let trap;
+  const { immediate, ...focusTrapOptions } = config;
+  const hasFocus = writable(false);
+  const isPaused = writable(false);
+  const activate = (opts) => trap?.activate(opts);
+  const deactivate = (opts) => {
+    trap?.deactivate(opts);
+  };
+  const pause = () => {
+    if (trap) {
+      trap.pause();
+      isPaused.set(true);
+    }
+  };
+  const unpause = () => {
+    if (trap) {
+      trap.unpause();
+      isPaused.set(false);
+    }
+  };
+  const useFocusTrap = (node) => {
+    trap = createFocusTrap$1(node, {
+      ...focusTrapOptions,
+      onActivate() {
+        hasFocus.set(true);
+        config.onActivate?.();
+      },
+      onDeactivate() {
+        hasFocus.set(false);
+        config.onDeactivate?.();
+      }
+    });
+    if (immediate) {
+      activate();
+    }
+    return {
+      destroy() {
+        deactivate();
+        trap = void 0;
+      }
+    };
+  };
+  return {
+    useFocusTrap,
+    hasFocus: readonly(hasFocus),
+    isPaused: readonly(isPaused),
+    activate,
+    deactivate,
+    pause,
+    unpause
+  };
+}
+const visibleModals = [];
+const useModal = (node, config) => {
+  let unsubInteractOutside = noop;
+  function removeNodeFromVisibleModals() {
+    const index = visibleModals.indexOf(node);
+    if (index >= 0) {
+      visibleModals.splice(index, 1);
+    }
+  }
+  function update(config2) {
+    unsubInteractOutside();
+    const { open, onClose, shouldCloseOnInteractOutside, closeOnInteractOutside } = config2;
+    sleep(100).then(() => {
+      if (open) {
+        visibleModals.push(node);
+      } else {
+        removeNodeFromVisibleModals();
+      }
+    });
+    function isLastModal() {
+      return last(visibleModals) === node;
+    }
+    function closeModal() {
+      if (isLastModal() && onClose) {
+        onClose();
+        removeNodeFromVisibleModals();
+      }
+    }
+    function onInteractOutsideStart(e) {
+      const target = e.target;
+      if (!isElement(target))
+        return;
+      if (target && isLastModal()) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+      }
+    }
+    function onInteractOutside(e) {
+      if (shouldCloseOnInteractOutside?.(e) && isLastModal()) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        closeModal();
+      }
+    }
+    unsubInteractOutside = useInteractOutside(node, {
+      onInteractOutsideStart,
+      onInteractOutside: closeOnInteractOutside ? onInteractOutside : void 0,
+      enabled: open
+    }).destroy;
+  }
+  update(config);
+  return {
+    update,
+    destroy() {
+      removeNodeFromVisibleModals();
+      unsubInteractOutside();
+    }
+  };
+};
+const defaultConfig = {
+  floating: {},
+  focusTrap: {},
+  modal: {},
+  escapeKeydown: {},
+  portal: "body"
+};
+const usePopper = (popperElement, args) => {
+  popperElement.dataset.escapee = "";
+  const { anchorElement, open, options } = args;
+  if (!anchorElement || !open || !options) {
+    return { destroy: noop };
+  }
+  const opts = { ...defaultConfig, ...options };
+  const callbacks = [];
+  if (opts.portal !== null) {
+    callbacks.push(usePortal(popperElement, opts.portal).destroy);
+  }
+  callbacks.push(useFloating(anchorElement, popperElement, opts.floating).destroy);
+  if (opts.focusTrap !== null) {
+    const { useFocusTrap } = createFocusTrap({
+      immediate: true,
+      escapeDeactivates: false,
+      allowOutsideClick: true,
+      returnFocusOnDeactivate: false,
+      fallbackFocus: popperElement,
+      ...opts.focusTrap
+    });
+    callbacks.push(useFocusTrap(popperElement).destroy);
+  }
+  if (opts.modal !== null) {
+    callbacks.push(useModal(popperElement, {
+      onClose: () => {
+        if (isHTMLElement(anchorElement)) {
+          open.set(false);
+          anchorElement.focus();
+        }
+      },
+      shouldCloseOnInteractOutside: (e) => {
+        if (e.defaultPrevented)
+          return false;
+        if (isHTMLElement(anchorElement) && anchorElement.contains(e.target)) {
+          return false;
+        }
+        return true;
+      },
+      ...opts.modal
+    }).destroy);
+  }
+  if (opts.escapeKeydown !== null) {
+    callbacks.push(useEscapeKeydown(popperElement, {
+      enabled: open,
+      handler: () => {
+        open.set(false);
+      },
+      ...opts.escapeKeydown
+    }).destroy);
+  }
+  const unsubscribe = executeCallbacks(...callbacks);
+  return {
+    destroy() {
+      unsubscribe();
+    }
+  };
+};
+const usePortal = (el, target = "body") => {
+  let targetEl;
+  if (!isHTMLElement(target) && typeof target !== "string") {
+    return {
+      destroy: noop
+    };
+  }
+  async function update(newTarget) {
+    target = newTarget;
+    if (typeof target === "string") {
+      targetEl = document.querySelector(target);
+      if (targetEl === null) {
+        await tick();
+        targetEl = document.querySelector(target);
+      }
+      if (targetEl === null) {
+        throw new Error(`No element found matching css selector: "${target}"`);
+      }
+    } else if (target instanceof HTMLElement) {
+      targetEl = target;
+    } else {
+      throw new TypeError(`Unknown portal target type: ${target === null ? "null" : typeof target}. Allowed types: string (CSS selector) or HTMLElement.`);
+    }
+    el.dataset.portal = "";
+    targetEl.appendChild(el);
+    el.hidden = false;
+  }
+  function destroy() {
+    el.remove();
+  }
+  update(target);
+  return {
+    update,
+    destroy
+  };
+};
+const useInteractOutside = (node, config) => {
+  let unsub = noop;
+  let unsubClick = noop;
+  let isPointerDown = false;
+  let isPointerDownInside = false;
+  let ignoreEmulatedMouseEvents = false;
+  function update(config2) {
+    unsub();
+    unsubClick();
+    const { onInteractOutside, onInteractOutsideStart, enabled } = config2;
+    if (!enabled)
+      return;
+    function onPointerDown(e) {
+      if (onInteractOutside && isValidEvent(e, node)) {
+        onInteractOutsideStart?.(e);
+      }
+      const target = e.target;
+      if (isElement(target) && isOrContainsTarget(node, target)) {
+        isPointerDownInside = true;
+      }
+      isPointerDown = true;
+    }
+    function triggerInteractOutside(e) {
+      onInteractOutside?.(e);
+    }
+    const documentObj = getOwnerDocument(node);
+    if (typeof PointerEvent !== "undefined") {
+      const onPointerUp = (e) => {
+        unsubClick();
+        const handler = (e2) => {
+          if (shouldTriggerInteractOutside(e2)) {
+            triggerInteractOutside(e2);
+          }
+          resetPointerState();
+        };
+        if (e.pointerType === "touch") {
+          unsubClick = addEventListener(documentObj, "click", handler, {
+            capture: true,
+            once: true
+          });
+          return;
+        }
+        handler(e);
+      };
+      unsub = executeCallbacks(addEventListener(documentObj, "pointerdown", onPointerDown, true), addEventListener(documentObj, "pointerup", onPointerUp, true));
+    } else {
+      const onMouseUp = (e) => {
+        if (ignoreEmulatedMouseEvents) {
+          ignoreEmulatedMouseEvents = false;
+        } else if (shouldTriggerInteractOutside(e)) {
+          triggerInteractOutside(e);
+        }
+        resetPointerState();
+      };
+      const onTouchEnd = (e) => {
+        ignoreEmulatedMouseEvents = true;
+        if (shouldTriggerInteractOutside(e)) {
+          triggerInteractOutside(e);
+        }
+        resetPointerState();
+      };
+      unsub = executeCallbacks(addEventListener(documentObj, "mousedown", onPointerDown, true), addEventListener(documentObj, "mouseup", onMouseUp, true), addEventListener(documentObj, "touchstart", onPointerDown, true), addEventListener(documentObj, "touchend", onTouchEnd, true));
+    }
+  }
+  function shouldTriggerInteractOutside(e) {
+    if (isPointerDown && !isPointerDownInside && isValidEvent(e, node)) {
+      return true;
+    }
+    return false;
+  }
+  function resetPointerState() {
+    isPointerDown = false;
+    isPointerDownInside = false;
+  }
+  update(config);
+  return {
+    update,
+    destroy() {
+      unsub();
+      unsubClick();
+    }
+  };
+};
+function isValidEvent(e, node) {
+  if ("button" in e && e.button > 0)
+    return false;
+  const target = e.target;
+  if (!isElement(target))
+    return false;
+  const ownerDocument = target.ownerDocument;
+  if (!ownerDocument || !ownerDocument.documentElement.contains(target)) {
+    return false;
+  }
+  return node && !isOrContainsTarget(node, target);
+}
+function isOrContainsTarget(node, target) {
+  return node === target || node.contains(target);
+}
+function getOwnerDocument(el) {
+  return el?.ownerDocument ?? document;
+}
 const SUB_OPEN_KEYS = {
   ltr: [...SELECTION_KEYS, kbd.ARROW_RIGHT],
   rtl: [...SELECTION_KEYS, kbd.ARROW_LEFT]
@@ -138,7 +691,7 @@ const SUB_CLOSE_KEYS = {
   rtl: [kbd.ARROW_RIGHT]
 };
 const menuIdParts = ["menu", "trigger"];
-const defaults$1 = {
+const defaults$2 = {
   arrowSize: 8,
   positioning: {
     placement: "bottom"
@@ -641,7 +1194,7 @@ function createMenuBuilder(opts) {
     orientation: "horizontal"
   });
   const subMenuDefaults = {
-    ...defaults$1,
+    ...defaults$2,
     disabled: false,
     positioning: {
       placement: "right-start",
@@ -1336,7 +1889,7 @@ function isFocusWithinSubmenu(submenuId) {
 function stateAttr(open) {
   return open ? "open" : "closed";
 }
-const defaults = {
+const defaults$1 = {
   arrowSize: 8,
   positioning: {
     placement: "bottom"
@@ -1356,7 +1909,7 @@ const defaults = {
   onOutsideClick: void 0
 };
 function createDropdownMenu(props) {
-  const withDefaults = { ...defaults, ...props };
+  const withDefaults = { ...defaults$1, ...props };
   const rootOptions = toWritableStores(omit(withDefaults, "ids"));
   const openWritable = withDefaults.open ?? writable(withDefaults.defaultOpen);
   const rootOpen = overridable(openWritable, withDefaults?.onOpenChange);
@@ -1381,8 +1934,134 @@ function createDropdownMenu(props) {
     options
   };
 }
+const defaults = {
+  orientation: "horizontal",
+  decorative: false
+};
+const createSeparator = (props) => {
+  const withDefaults = { ...defaults, ...props };
+  const options = toWritableStores(withDefaults);
+  const { orientation, decorative } = options;
+  const root = makeElement("separator", {
+    stores: [orientation, decorative],
+    returned: ([$orientation, $decorative]) => {
+      const ariaOrientation = $orientation === "vertical" ? $orientation : void 0;
+      return {
+        role: $decorative ? "none" : "separator",
+        "aria-orientation": ariaOrientation,
+        "aria-hidden": $decorative,
+        "data-orientation": $orientation
+      };
+    }
+  });
+  return {
+    elements: {
+      root
+    },
+    options
+  };
+};
 function generateId() {
   return nanoid(10);
+}
+function getAttrs(builders) {
+  const attrs = {};
+  builders.forEach((builder) => {
+    Object.keys(builder).forEach((key) => {
+      if (key !== "action") {
+        attrs[key] = builder[key];
+      }
+    });
+  });
+  return attrs;
+}
+const Button$1 = create_ssr_component(($$result, $$props, $$bindings, slots) => {
+  let $$restProps = compute_rest_props($$props, ["href", "type", "builders", "el"]);
+  let { href = void 0 } = $$props;
+  let { type = void 0 } = $$props;
+  let { builders = [] } = $$props;
+  let { el = void 0 } = $$props;
+  const attrs = { "data-button-root": "" };
+  if ($$props.href === void 0 && $$bindings.href && href !== void 0)
+    $$bindings.href(href);
+  if ($$props.type === void 0 && $$bindings.type && type !== void 0)
+    $$bindings.type(type);
+  if ($$props.builders === void 0 && $$bindings.builders && builders !== void 0)
+    $$bindings.builders(builders);
+  if ($$props.el === void 0 && $$bindings.el && el !== void 0)
+    $$bindings.el(el);
+  return `${builders && builders.length ? ` ${((tag) => {
+    return tag ? `<${href ? "a" : "button"}${spread(
+      [
+        {
+          type: escape_attribute_value(href ? void 0 : type)
+        },
+        { href: escape_attribute_value(href) },
+        { tabindex: "0" },
+        escape_object(getAttrs(builders)),
+        escape_object($$restProps),
+        escape_object(attrs)
+      ],
+      {}
+    )}${add_attribute("this", el, 0)}>${is_void(tag) ? "" : `${slots.default ? slots.default({}) : ``}`}${is_void(tag) ? "" : `</${tag}>`}` : "";
+  })(href ? "a" : "button")}` : ` ${((tag) => {
+    return tag ? `<${href ? "a" : "button"}${spread(
+      [
+        {
+          type: escape_attribute_value(href ? void 0 : type)
+        },
+        { href: escape_attribute_value(href) },
+        { tabindex: "0" },
+        escape_object($$restProps),
+        escape_object(attrs)
+      ],
+      {}
+    )}${add_attribute("this", el, 0)}>${is_void(tag) ? "" : `${slots.default ? slots.default({}) : ``}`}${is_void(tag) ? "" : `</${tag}>`}` : "";
+  })(href ? "a" : "button")}`}`;
+});
+function getPositioningUpdater(store) {
+  return (props = {}) => {
+    return updatePositioning$1(store, props);
+  };
+}
+function updatePositioning$1(store, props) {
+  const defaultPositioningProps = {
+    side: "bottom",
+    align: "center",
+    sideOffset: 0,
+    alignOffset: 0,
+    sameWidth: false,
+    avoidCollisions: true,
+    collisionPadding: 8,
+    fitViewport: false,
+    strategy: "absolute",
+    overlap: false
+  };
+  const withDefaults = { ...defaultPositioningProps, ...props };
+  store.update((prev) => {
+    return {
+      ...prev,
+      placement: joinPlacement(withDefaults.side, withDefaults.align),
+      offset: {
+        ...prev.offset,
+        mainAxis: withDefaults.sideOffset,
+        crossAxis: withDefaults.alignOffset
+      },
+      gutter: 0,
+      sameWidth: withDefaults.sameWidth,
+      flip: withDefaults.avoidCollisions,
+      overflowPadding: withDefaults.collisionPadding,
+      boundary: withDefaults.collisionBoundary,
+      fitViewport: withDefaults.fitViewport,
+      strategy: withDefaults.strategy,
+      overlap: withDefaults.overlap
+    };
+  });
+}
+function joinPlacement(side, align) {
+  if (align === "center")
+    return side;
+  return `${side}-${align}`;
 }
 function getMenuData() {
   const NAME = "menu";
@@ -1423,10 +2102,10 @@ function getCtx() {
 }
 function setCtx(props) {
   const { NAME, PARTS } = getMenuData();
-  const getAttrs = createBitAttrs("menu", PARTS);
+  const getAttrs2 = createBitAttrs("menu", PARTS);
   const dropdownMenu = {
     ...createDropdownMenu({ ...removeUndefined(props), forceVisible: true }),
-    getAttrs
+    getAttrs: getAttrs2
   };
   setContext(NAME, dropdownMenu);
   return {
@@ -1436,10 +2115,10 @@ function setCtx(props) {
 }
 function setGroupCtx() {
   const { GROUP_NAME } = getMenuData();
-  const { elements: { group }, getAttrs } = getCtx();
+  const { elements: { group }, getAttrs: getAttrs2 } = getCtx();
   const id = generateId();
   setContext(GROUP_NAME, id);
-  return { group, id, getAttrs };
+  return { group, id, getAttrs: getAttrs2 };
 }
 function updatePositioning(props) {
   const defaultPlacement = {
@@ -1460,7 +2139,7 @@ const Menu_item = create_ssr_component(($$result, $$props, $$bindings, slots) =>
   let { asChild = false } = $$props;
   let { disabled = false } = $$props;
   let { el = void 0 } = $$props;
-  const { elements: { item }, getAttrs } = getCtx();
+  const { elements: { item }, getAttrs: getAttrs2 } = getCtx();
   $$unsubscribe_item = subscribe(item, (value) => $item = value);
   createDispatcher();
   if ($$props.href === void 0 && $$bindings.href && href !== void 0)
@@ -1473,7 +2152,7 @@ const Menu_item = create_ssr_component(($$result, $$props, $$bindings, slots) =>
     $$bindings.el(el);
   builder = $item;
   attrs = {
-    ...getAttrs("item"),
+    ...getAttrs2("item"),
     ...disabledAttrs(disabled)
   };
   {
@@ -1497,9 +2176,9 @@ const Menu_group = create_ssr_component(($$result, $$props, $$bindings, slots) =
   let $group, $$unsubscribe_group;
   let { asChild = false } = $$props;
   let { el = void 0 } = $$props;
-  const { group, id, getAttrs } = setGroupCtx();
+  const { group, id, getAttrs: getAttrs2 } = setGroupCtx();
   $$unsubscribe_group = subscribe(group, (value) => $group = value);
-  const attrs = getAttrs("group");
+  const attrs = getAttrs2("group");
   if ($$props.asChild === void 0 && $$bindings.asChild && asChild !== void 0)
     $$bindings.asChild(asChild);
   if ($$props.el === void 0 && $$bindings.el && el !== void 0)
@@ -1659,11 +2338,11 @@ const Menu_content = create_ssr_component(($$result, $$props, $$bindings, slots)
   let { strategy = "absolute" } = $$props;
   let { overlap = false } = $$props;
   let { el = void 0 } = $$props;
-  const { elements: { menu }, states: { open }, ids, getAttrs } = getCtx();
+  const { elements: { menu }, states: { open }, ids, getAttrs: getAttrs2 } = getCtx();
   $$unsubscribe_menu = subscribe(menu, (value) => $menu = value);
   $$unsubscribe_open = subscribe(open, (value) => $open = value);
   createDispatcher();
-  const attrs = getAttrs("content");
+  const attrs = getAttrs2("content");
   if ($$props.transition === void 0 && $$bindings.transition && transition !== void 0)
     $$bindings.transition(transition);
   if ($$props.transitionConfig === void 0 && $$bindings.transitionConfig && transitionConfig !== void 0)
@@ -1741,10 +2420,10 @@ const Menu_trigger = create_ssr_component(($$result, $$props, $$bindings, slots)
   let { asChild = false } = $$props;
   let { id = void 0 } = $$props;
   let { el = void 0 } = $$props;
-  const { elements: { trigger }, ids, getAttrs } = getCtx();
+  const { elements: { trigger }, ids, getAttrs: getAttrs2 } = getCtx();
   $$unsubscribe_trigger = subscribe(trigger, (value) => $trigger = value);
   createDispatcher();
-  const attrs = getAttrs("trigger");
+  const attrs = getAttrs2("trigger");
   if ($$props.asChild === void 0 && $$bindings.asChild && asChild !== void 0)
     $$bindings.asChild(asChild);
   if ($$props.id === void 0 && $$bindings.id && id !== void 0)
@@ -1762,6 +2441,39 @@ const Menu_trigger = create_ssr_component(($$result, $$props, $$bindings, slots)
   }
   $$unsubscribe_trigger();
   return `${asChild ? `${slots.default ? slots.default({ builder }) : ``}` : `<button${spread([escape_object(builder), { type: "button" }, escape_object($$restProps)], {})}${add_attribute("this", el, 0)}>${slots.default ? slots.default({ builder }) : ``}</button>`}`;
+});
+const Button = create_ssr_component(($$result, $$props, $$bindings, slots) => {
+  let $$restProps = compute_rest_props($$props, ["class", "variant", "size", "builders"]);
+  let { class: className = void 0 } = $$props;
+  let { variant = "default" } = $$props;
+  let { size: size2 = "default" } = $$props;
+  let { builders = [] } = $$props;
+  if ($$props.class === void 0 && $$bindings.class && className !== void 0)
+    $$bindings.class(className);
+  if ($$props.variant === void 0 && $$bindings.variant && variant !== void 0)
+    $$bindings.variant(variant);
+  if ($$props.size === void 0 && $$bindings.size && size2 !== void 0)
+    $$bindings.size(size2);
+  if ($$props.builders === void 0 && $$bindings.builders && builders !== void 0)
+    $$bindings.builders(builders);
+  return `${validate_component(Button$1, "ButtonPrimitive.Root").$$render(
+    $$result,
+    Object.assign(
+      {},
+      { builders },
+      {
+        class: cn(buttonVariants({ variant, size: size2, className }))
+      },
+      { type: "button" },
+      $$restProps
+    ),
+    {},
+    {
+      default: () => {
+        return `${slots.default ? slots.default({}) : ``}`;
+      }
+    }
+  )}`;
 });
 const css$1 = {
   code: ".error.svelte-8cyjz5{--tw-border-opacity:1;border-color:rgb(254 202 202 / var(--tw-border-opacity));--tw-bg-opacity:1;background-color:rgb(254 242 242 / var(--tw-bg-opacity));--tw-text-opacity:1;color:rgb(153 27 27 / var(--tw-text-opacity))\n}.warning.svelte-8cyjz5{--tw-border-opacity:1;border-color:rgb(254 240 138 / var(--tw-border-opacity));--tw-bg-opacity:1;background-color:rgb(254 252 232 / var(--tw-bg-opacity));--tw-text-opacity:1;color:rgb(133 77 14 / var(--tw-text-opacity))\n}.success.svelte-8cyjz5{--tw-border-opacity:1;border-color:rgb(187 247 208 / var(--tw-border-opacity));--tw-bg-opacity:1;background-color:rgb(240 253 244 / var(--tw-bg-opacity));--tw-text-opacity:1;color:rgb(22 101 52 / var(--tw-text-opacity))\n}.info.svelte-8cyjz5{--tw-border-opacity:1;border-color:rgb(229 231 235 / var(--tw-border-opacity));--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity));--tw-text-opacity:1;color:rgb(31 41 55 / var(--tw-text-opacity))\n}",

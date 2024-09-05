@@ -1,10 +1,81 @@
+import { r as run_all } from "./utils.js";
+import { j as set_current_component, k as current_component, f as createEventDispatcher } from "./ssr.js";
 import { w as withGet } from "./VennDiagram.svelte_svelte_type_style_lang.js";
 import { nanoid } from "nanoid/non-secure";
 import { w as writable } from "./index2.js";
-import { f as createEventDispatcher } from "./ssr.js";
+const dirty_components = [];
+const binding_callbacks = [];
+let render_callbacks = [];
+const flush_callbacks = [];
+const resolved_promise = /* @__PURE__ */ Promise.resolve();
+let update_scheduled = false;
+function schedule_update() {
+  if (!update_scheduled) {
+    update_scheduled = true;
+    resolved_promise.then(flush);
+  }
+}
+function tick() {
+  schedule_update();
+  return resolved_promise;
+}
+function add_render_callback(fn) {
+  render_callbacks.push(fn);
+}
+const seen_callbacks = /* @__PURE__ */ new Set();
+let flushidx = 0;
+function flush() {
+  if (flushidx !== 0) {
+    return;
+  }
+  const saved_component = current_component;
+  do {
+    try {
+      while (flushidx < dirty_components.length) {
+        const component = dirty_components[flushidx];
+        flushidx++;
+        set_current_component(component);
+        update(component.$$);
+      }
+    } catch (e) {
+      dirty_components.length = 0;
+      flushidx = 0;
+      throw e;
+    }
+    set_current_component(null);
+    dirty_components.length = 0;
+    flushidx = 0;
+    while (binding_callbacks.length)
+      binding_callbacks.pop()();
+    for (let i = 0; i < render_callbacks.length; i += 1) {
+      const callback = render_callbacks[i];
+      if (!seen_callbacks.has(callback)) {
+        seen_callbacks.add(callback);
+        callback();
+      }
+    }
+    render_callbacks.length = 0;
+  } while (dirty_components.length);
+  while (flush_callbacks.length) {
+    flush_callbacks.pop()();
+  }
+  update_scheduled = false;
+  seen_callbacks.clear();
+  set_current_component(saved_component);
+}
+function update($$) {
+  if ($$.fragment !== null) {
+    $$.update();
+    run_all($$.before_update);
+    const dirty = $$.dirty;
+    $$.dirty = [-1];
+    $$.fragment && $$.fragment.p($$.ctx, dirty);
+    $$.after_update.forEach(add_render_callback);
+  }
+}
 const overridable = (_store, onChange) => {
   const store = withGet(_store);
-  const update = (updater, sideEffect) => {
+  const update2 = (updater, sideEffect) => {
     store.update((curr) => {
       const next = updater(curr);
       let res = next;
@@ -16,11 +87,11 @@ const overridable = (_store, onChange) => {
     });
   };
   const set = (curr) => {
-    update(() => curr);
+    update2(() => curr);
   };
   return {
     ...store,
-    update,
+    update: update2,
     set
   };
 };
@@ -87,13 +158,14 @@ function getOptionUpdater(options) {
   };
 }
 export {
-  getOptionUpdater as a,
-  createDispatcher as b,
+  toWritableStores as a,
+  getOptionUpdater as b,
   createBitAttrs as c,
-  disabledAttrs as d,
-  generateId as e,
+  createDispatcher as d,
+  disabledAttrs as e,
+  generateId as f,
   generateIds as g,
   overridable as o,
   removeUndefined as r,
-  toWritableStores as t
+  tick as t
 };

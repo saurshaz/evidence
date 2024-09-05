@@ -49,7 +49,7 @@ const config = {
 		// adapter: adapter({
 		// 	strict: false
 		// }),
-		adapter: adapter(),
+		adapter: adapter({	strict: false }),
 		files: {
 			routes: 'src/pages',
 			lib: 'src/components'
@@ -65,13 +65,6 @@ const config = {
 				// throw new Error(message); // FIXME:
 			}
 		},
-
-		// adapter: adapter({
-		// 	// default options are shown
-		// 	pages: 'build',
-		// 	assets: 'build',
-		// 	fallback: null
-		// })
 	}
 };
 

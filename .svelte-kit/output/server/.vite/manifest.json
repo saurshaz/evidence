@@ -9,78 +9,15 @@
       "_environment.js"
     ]
   },
-  "_AccordionItem.js": {
-    "file": "chunks/AccordionItem.js",
-    "name": "AccordionItem",
-    "imports": [
-      "_ssr.js",
-      "_utils.js",
-      "_VennDiagram.svelte_svelte_type_style_lang.js",
-      "_updater.js",
-      "_index2.js",
-      "_index5.js"
-    ]
-  },
-  "_Alert.js": {
-    "file": "chunks/Alert.js",
-    "name": "Alert",
-    "imports": [
-      "_ssr.js",
-      "_VennDiagram.svelte_svelte_type_style_lang.js"
-    ]
-  },
-  "_AreaChart.js": {
-    "file": "chunks/AreaChart.js",
-    "name": "AreaChart",
-    "imports": [
-      "_ssr.js",
-      "_getCompletedData.js",
-      "_utils.js",
-      "_colours.js"
-    ]
-  },
-  "_BarChart.js": {
-    "file": "chunks/BarChart.js",
-    "name": "BarChart",
-    "imports": [
-      "_ssr.js",
-      "_getCompletedData.js",
-      "_utils.js",
-      "_colours.js"
-    ]
-  },
-  "_BigValue.js": {
-    "file": "chunks/BigValue.js",
-    "name": "BigValue",
-    "imports": [
-      "_colours.js",
-      "_ssr.js",
-      "_Value.js",
-      "_index3.js",
-      "_DataTable.js"
-    ]
-  },
-  "_ButtonGroup.js": {
-    "file": "chunks/ButtonGroup.js",
-    "name": "ButtonGroup",
-    "imports": [
-      "_utils.js",
-      "_ssr.js",
-      "_index2.js",
-      "_buildQuery.js",
-      "_stores2.js",
-      "_HiddenInPrint.js",
-      "_colours.js"
-    ]
-  },
   "_DataTable.js": {
     "file": "chunks/DataTable.js",
     "name": "DataTable",
     "imports": [
-      "_colours.js",
       "_ssr.js",
       "_utils.js",
       "_index2.js",
+      "_buildQuery.js",
+      "_inferColumnTypes.js",
       "_VennDiagram.svelte_svelte_type_style_lang.js",
       "_index4.js",
       "_environment.js",
@@ -88,90 +25,16 @@
       "_stores.js"
     ]
   },
-  "_Dropdown.js": {
-    "file": "chunks/Dropdown.js",
-    "name": "Dropdown",
-    "imports": [
-      "_utils.js",
-      "_VennDiagram.svelte_svelte_type_style_lang.js",
-      "_ssr.js",
-      "_buildQuery.js",
-      "_stores2.js",
-      "_index5.js",
-      "_index2.js",
-      "_updater.js",
-      "_button.js",
-      "_HiddenInPrint.js",
-      "_colours.js"
-    ]
-  },
-  "_HiddenInPrint.js": {
-    "file": "chunks/HiddenInPrint.js",
-    "name": "HiddenInPrint",
-    "imports": [
-      "_ssr.js"
-    ]
-  },
-  "_LineChart.js": {
-    "file": "chunks/LineChart.js",
-    "name": "LineChart",
-    "imports": [
-      "_ssr.js",
-      "_getCompletedData.js",
-      "_utils.js",
-      "_colours.js"
-    ]
-  },
-  "_QueryViewer.js": {
-    "file": "chunks/QueryViewer.js",
-    "name": "QueryViewer",
-    "imports": [
-      "_utils.js",
-      "_ssr.js",
-      "_colours.js",
-      "_VennDiagram.svelte_svelte_type_style_lang.js",
-      "_stores.js",
-      "_stores2.js"
-    ]
-  },
-  "_ScatterPlot.js": {
-    "file": "chunks/ScatterPlot.js",
-    "name": "ScatterPlot",
-    "imports": [
-      "_ssr.js",
-      "_getCompletedData.js",
-      "_utils.js",
-      "_colours.js"
-    ]
-  },
-  "_Tab.js": {
-    "file": "chunks/Tab.js",
-    "name": "Tab",
-    "imports": [
-      "_utils.js",
-      "_ssr.js",
-      "_index2.js"
-    ]
-  },
-  "_Value.js": {
-    "file": "chunks/Value.js",
-    "name": "Value",
-    "imports": [
-      "_colours.js",
-      "_ssr.js",
-      "_VennDiagram.svelte_svelte_type_style_lang.js"
-    ]
-  },
   "_VennDiagram.svelte_svelte_type_style_lang.js": {
     "file": "chunks/VennDiagram.svelte_svelte_type_style_lang.js",
     "name": "VennDiagram.svelte_svelte_type_style_lang",
     "imports": [
       "_inferColumnTypes.js",
-      "_utils.js",
-      "_ssr.js",
       "_index2.js",
       "_stores.js",
-      "_ssr2.js"
+      "_utils.js",
+      "_ssr2.js",
+      "_ssr.js"
     ],
     "css": [
       "_app/immutable/assets/VennDiagram.C5OkaS4Z.css"
@@ -185,28 +48,6 @@
       "_index2.js"
     ]
   },
-  "_button.js": {
-    "file": "chunks/button.js",
-    "name": "button",
-    "imports": [
-      "_VennDiagram.svelte_svelte_type_style_lang.js",
-      "_index2.js",
-      "_updater.js",
-      "_utils.js",
-      "_ssr.js"
-    ]
-  },
-  "_colours.js": {
-    "file": "chunks/colours.js",
-    "name": "colours",
-    "imports": [
-      "_utils.js",
-      "_ssr.js",
-      "_buildQuery.js",
-      "_inferColumnTypes.js",
-      "_VennDiagram.svelte_svelte_type_style_lang.js"
-    ]
-  },
   "_environment.js": {
     "file": "chunks/environment.js",
     "name": "environment"
@@ -214,17 +55,6 @@
   "_exports.js": {
     "file": "chunks/exports.js",
     "name": "exports"
-  },
-  "_getCompletedData.js": {
-    "file": "chunks/getCompletedData.js",
-    "name": "getCompletedData",
-    "imports": [
-      "_colours.js",
-      "_ssr.js",
-      "_utils.js",
-      "_index2.js",
-      "_VennDiagram.svelte_svelte_type_style_lang.js"
-    ]
   },
   "_index.js": {
     "file": "chunks/index.js",
@@ -310,9 +140,10 @@
     "file": "chunks/updater.js",
     "name": "updater",
     "imports": [
+      "_utils.js",
+      "_ssr.js",
       "_VennDiagram.svelte_svelte_type_style_lang.js",
-      "_index2.js",
-      "_ssr.js"
+      "_index2.js"
     ]
   },
   "_utils.js": {
@@ -620,7 +451,9 @@
       "_VennDiagram.svelte_svelte_type_style_lang.js",
       "_stores.js",
       "_inferColumnTypes.js",
-      "_AccordionItem.js",
+      "_updater.js",
+      "_index2.js",
+      "_index5.js",
       "_index4.js"
     ]
   },
@@ -651,8 +484,7 @@
       "_index3.js",
       "_index4.js",
       "_updater.js",
-      "_index2.js",
-      "_button.js"
+      "_index2.js"
     ],
     "css": [
       "_app/immutable/assets/_layout.BzJ6hGON.css"
@@ -827,24 +659,6 @@
       "src/pages/+page.md",
       "src/pages/about/+page.md",
       "src/pages/about/how_it_works/+page.md",
-      "src/pages/nba/+page.md",
-      "src/pages/nba/Lakers_vs_Clippers/+page.md",
-      "src/pages/nba/advanced/+page.md",
-      "src/pages/nba/historical_matchups/+page.md",
-      "src/pages/nba/in-season tournament/+page.md",
-      "src/pages/nba/predictions/+page.md",
-      "src/pages/nba/teams/+page.md",
-      "src/pages/nba/teams/[nba_teams]/+page.md",
-      "src/pages/ncaaf/+page.md",
-      "src/pages/ncaaf/conferences/+page.md",
-      "src/pages/ncaaf/conferences/[ncaaf_conferences]/+page.md",
-      "src/pages/ncaaf/predictions/+page.md",
-      "src/pages/ncaaf/teams/+page.md",
-      "src/pages/ncaaf/teams/[ncaaf_teams]/+page.md",
-      "src/pages/nfl/+page.md",
-      "src/pages/nfl/predictions/+page.md",
-      "src/pages/nfl/teams/+page.md",
-      "src/pages/nfl/teams/[nfl_teams]/+page.md",
       "src/pages/test/+page.md"
     ]
   },
@@ -906,412 +720,6 @@
       "_inferColumnTypes.js"
     ]
   },
-  "src/pages/nba/+page.md": {
-    "file": "entries/pages/nba/_page.md.js",
-    "name": "entries/pages/nba/_page.md",
-    "src": "src/pages/nba/+page.md",
-    "isEntry": true,
-    "isDynamicEntry": true,
-    "imports": [
-      "_utils.js",
-      "_ssr.js",
-      "_VennDiagram.svelte_svelte_type_style_lang.js",
-      "_stores.js",
-      "_buildQuery.js",
-      "_index2.js",
-      "_inferColumnTypes.js",
-      "_DataTable.js",
-      "_stores2.js",
-      "_AreaChart.js",
-      "_BarChart.js",
-      "_Value.js",
-      "_getCompletedData.js",
-      "_profile.js",
-      "_QueryViewer.js",
-      "_ButtonGroup.js",
-      "_Alert.js",
-      "_Dropdown.js",
-      "_Tab.js"
-    ]
-  },
-  "src/pages/nba/Lakers_vs_Clippers/+page.md": {
-    "file": "entries/pages/nba/Lakers_vs_Clippers/_page.md.js",
-    "name": "entries/pages/nba/Lakers_vs_Clippers/_page.md",
-    "src": "src/pages/nba/Lakers_vs_Clippers/+page.md",
-    "isEntry": true,
-    "isDynamicEntry": true,
-    "imports": [
-      "_utils.js",
-      "_ssr.js",
-      "_VennDiagram.svelte_svelte_type_style_lang.js",
-      "_stores.js",
-      "_buildQuery.js",
-      "_index2.js",
-      "_inferColumnTypes.js",
-      "_stores2.js",
-      "_ScatterPlot.js",
-      "_colours.js",
-      "_profile.js",
-      "_QueryViewer.js"
-    ]
-  },
-  "src/pages/nba/advanced/+page.md": {
-    "file": "entries/pages/nba/advanced/_page.md.js",
-    "name": "entries/pages/nba/advanced/_page.md",
-    "src": "src/pages/nba/advanced/+page.md",
-    "isEntry": true,
-    "isDynamicEntry": true,
-    "imports": [
-      "_utils.js",
-      "_ssr.js",
-      "_VennDiagram.svelte_svelte_type_style_lang.js",
-      "_stores.js",
-      "_buildQuery.js",
-      "_index2.js",
-      "_inferColumnTypes.js",
-      "_stores2.js",
-      "_LineChart.js",
-      "_ScatterPlot.js",
-      "_profile.js",
-      "_QueryViewer.js"
-    ]
-  },
-  "src/pages/nba/historical_matchups/+page.md": {
-    "file": "entries/pages/nba/historical_matchups/_page.md.js",
-    "name": "entries/pages/nba/historical_matchups/_page.md",
-    "src": "src/pages/nba/historical_matchups/+page.md",
-    "isEntry": true,
-    "isDynamicEntry": true,
-    "imports": [
-      "_utils.js",
-      "_ssr.js",
-      "_VennDiagram.svelte_svelte_type_style_lang.js",
-      "_stores.js",
-      "_buildQuery.js",
-      "_index2.js",
-      "_inferColumnTypes.js",
-      "_DataTable.js",
-      "_stores2.js",
-      "_BarChart.js",
-      "_LineChart.js",
-      "_profile.js",
-      "_QueryViewer.js",
-      "_Dropdown.js",
-      "_updater.js",
-      "_HiddenInPrint.js",
-      "_colours.js"
-    ]
-  },
-  "src/pages/nba/in-season tournament/+page.md": {
-    "file": "entries/pages/nba/in-season tournament/_page.md.js",
-    "name": "entries/pages/nba/in-season tournament/_page.md",
-    "src": "src/pages/nba/in-season tournament/+page.md",
-    "isEntry": true,
-    "isDynamicEntry": true,
-    "imports": [
-      "_utils.js",
-      "_ssr.js",
-      "_VennDiagram.svelte_svelte_type_style_lang.js",
-      "_stores.js",
-      "_buildQuery.js",
-      "_index2.js",
-      "_inferColumnTypes.js",
-      "_DataTable.js",
-      "_stores2.js",
-      "_profile.js",
-      "_QueryViewer.js",
-      "_Tab.js"
-    ]
-  },
-  "src/pages/nba/predictions/+page.md": {
-    "file": "entries/pages/nba/predictions/_page.md.js",
-    "name": "entries/pages/nba/predictions/_page.md",
-    "src": "src/pages/nba/predictions/+page.md",
-    "isEntry": true,
-    "isDynamicEntry": true,
-    "imports": [
-      "_utils.js",
-      "_ssr.js",
-      "_VennDiagram.svelte_svelte_type_style_lang.js",
-      "_stores.js",
-      "_buildQuery.js",
-      "_index2.js",
-      "_inferColumnTypes.js",
-      "_DataTable.js",
-      "_stores2.js",
-      "_BigValue.js",
-      "_profile.js",
-      "_QueryViewer.js",
-      "_AccordionItem.js",
-      "_Dropdown.js"
-    ]
-  },
-  "src/pages/nba/teams/+page.md": {
-    "file": "entries/pages/nba/teams/_page.md.js",
-    "name": "entries/pages/nba/teams/_page.md",
-    "src": "src/pages/nba/teams/+page.md",
-    "isEntry": true,
-    "isDynamicEntry": true,
-    "imports": [
-      "_utils.js",
-      "_ssr.js",
-      "_VennDiagram.svelte_svelte_type_style_lang.js",
-      "_stores.js",
-      "_buildQuery.js",
-      "_index2.js",
-      "_inferColumnTypes.js",
-      "_DataTable.js",
-      "_stores2.js",
-      "_profile.js",
-      "_QueryViewer.js",
-      "_ButtonGroup.js"
-    ]
-  },
-  "src/pages/nba/teams/[nba_teams]/+page.md": {
-    "file": "entries/pages/nba/teams/_nba_teams_/_page.md.js",
-    "name": "entries/pages/nba/teams/_nba_teams_/_page.md",
-    "src": "src/pages/nba/teams/[nba_teams]/+page.md",
-    "isEntry": true,
-    "isDynamicEntry": true,
-    "imports": [
-      "_utils.js",
-      "_ssr.js",
-      "_VennDiagram.svelte_svelte_type_style_lang.js",
-      "_stores.js",
-      "_buildQuery.js",
-      "_index2.js",
-      "_inferColumnTypes.js",
-      "_DataTable.js",
-      "_stores2.js",
-      "_AreaChart.js",
-      "_BarChart.js",
-      "_BigValue.js",
-      "_LineChart.js",
-      "_Value.js",
-      "_profile.js",
-      "_QueryViewer.js"
-    ]
-  },
-  "src/pages/ncaaf/+page.md": {
-    "file": "entries/pages/ncaaf/_page.md.js",
-    "name": "entries/pages/ncaaf/_page.md",
-    "src": "src/pages/ncaaf/+page.md",
-    "isEntry": true,
-    "isDynamicEntry": true,
-    "imports": [
-      "_utils.js",
-      "_ssr.js",
-      "_VennDiagram.svelte_svelte_type_style_lang.js",
-      "_stores.js",
-      "_buildQuery.js",
-      "_index2.js",
-      "_inferColumnTypes.js",
-      "_DataTable.js",
-      "_stores2.js",
-      "_Value.js",
-      "_profile.js",
-      "_QueryViewer.js",
-      "_Alert.js"
-    ]
-  },
-  "src/pages/ncaaf/conferences/+page.md": {
-    "file": "entries/pages/ncaaf/conferences/_page.md.js",
-    "name": "entries/pages/ncaaf/conferences/_page.md",
-    "src": "src/pages/ncaaf/conferences/+page.md",
-    "isEntry": true,
-    "isDynamicEntry": true,
-    "imports": [
-      "_utils.js",
-      "_ssr.js",
-      "_VennDiagram.svelte_svelte_type_style_lang.js",
-      "_stores.js",
-      "_buildQuery.js",
-      "_index2.js",
-      "_inferColumnTypes.js",
-      "_DataTable.js",
-      "_stores2.js",
-      "_profile.js",
-      "_QueryViewer.js"
-    ]
-  },
-  "src/pages/ncaaf/conferences/[ncaaf_conferences]/+page.md": {
-    "file": "entries/pages/ncaaf/conferences/_ncaaf_conferences_/_page.md.js",
-    "name": "entries/pages/ncaaf/conferences/_ncaaf_conferences_/_page.md",
-    "src": "src/pages/ncaaf/conferences/[ncaaf_conferences]/+page.md",
-    "isEntry": true,
-    "isDynamicEntry": true,
-    "imports": [
-      "_utils.js",
-      "_ssr.js",
-      "_VennDiagram.svelte_svelte_type_style_lang.js",
-      "_stores.js",
-      "_buildQuery.js",
-      "_index2.js",
-      "_inferColumnTypes.js",
-      "_DataTable.js",
-      "_stores2.js",
-      "_Value.js",
-      "_profile.js",
-      "_QueryViewer.js"
-    ]
-  },
-  "src/pages/ncaaf/predictions/+page.md": {
-    "file": "entries/pages/ncaaf/predictions/_page.md.js",
-    "name": "entries/pages/ncaaf/predictions/_page.md",
-    "src": "src/pages/ncaaf/predictions/+page.md",
-    "isEntry": true,
-    "isDynamicEntry": true,
-    "imports": [
-      "_utils.js",
-      "_ssr.js",
-      "_VennDiagram.svelte_svelte_type_style_lang.js",
-      "_stores.js",
-      "_buildQuery.js",
-      "_index2.js",
-      "_inferColumnTypes.js",
-      "_DataTable.js",
-      "_stores2.js",
-      "_BigValue.js",
-      "_profile.js",
-      "_QueryViewer.js",
-      "_AccordionItem.js"
-    ]
-  },
-  "src/pages/ncaaf/teams/+page.md": {
-    "file": "entries/pages/ncaaf/teams/_page.md.js",
-    "name": "entries/pages/ncaaf/teams/_page.md",
-    "src": "src/pages/ncaaf/teams/+page.md",
-    "isEntry": true,
-    "isDynamicEntry": true,
-    "imports": [
-      "_utils.js",
-      "_ssr.js",
-      "_VennDiagram.svelte_svelte_type_style_lang.js",
-      "_stores.js",
-      "_buildQuery.js",
-      "_index2.js",
-      "_inferColumnTypes.js",
-      "_DataTable.js",
-      "_stores2.js",
-      "_profile.js",
-      "_QueryViewer.js"
-    ]
-  },
-  "src/pages/ncaaf/teams/[ncaaf_teams]/+page.md": {
-    "file": "entries/pages/ncaaf/teams/_ncaaf_teams_/_page.md.js",
-    "name": "entries/pages/ncaaf/teams/_ncaaf_teams_/_page.md",
-    "src": "src/pages/ncaaf/teams/[ncaaf_teams]/+page.md",
-    "isEntry": true,
-    "isDynamicEntry": true,
-    "imports": [
-      "_utils.js",
-      "_ssr.js",
-      "_VennDiagram.svelte_svelte_type_style_lang.js",
-      "_stores.js",
-      "_buildQuery.js",
-      "_index2.js",
-      "_inferColumnTypes.js",
-      "_DataTable.js",
-      "_stores2.js",
-      "_BigValue.js",
-      "_LineChart.js",
-      "_Value.js",
-      "_profile.js",
-      "_QueryViewer.js"
-    ]
-  },
-  "src/pages/nfl/+page.md": {
-    "file": "entries/pages/nfl/_page.md.js",
-    "name": "entries/pages/nfl/_page.md",
-    "src": "src/pages/nfl/+page.md",
-    "isEntry": true,
-    "isDynamicEntry": true,
-    "imports": [
-      "_utils.js",
-      "_ssr.js",
-      "_VennDiagram.svelte_svelte_type_style_lang.js",
-      "_stores.js",
-      "_buildQuery.js",
-      "_index2.js",
-      "_inferColumnTypes.js",
-      "_stores2.js",
-      "_AreaChart.js",
-      "_BarChart.js",
-      "_Value.js",
-      "_profile.js",
-      "_QueryViewer.js",
-      "_Alert.js",
-      "_Tab.js"
-    ]
-  },
-  "src/pages/nfl/predictions/+page.md": {
-    "file": "entries/pages/nfl/predictions/_page.md.js",
-    "name": "entries/pages/nfl/predictions/_page.md",
-    "src": "src/pages/nfl/predictions/+page.md",
-    "isEntry": true,
-    "isDynamicEntry": true,
-    "imports": [
-      "_utils.js",
-      "_ssr.js",
-      "_VennDiagram.svelte_svelte_type_style_lang.js",
-      "_stores.js",
-      "_buildQuery.js",
-      "_index2.js",
-      "_inferColumnTypes.js",
-      "_DataTable.js",
-      "_stores2.js",
-      "_BigValue.js",
-      "_LineChart.js",
-      "_profile.js",
-      "_QueryViewer.js",
-      "_AccordionItem.js"
-    ]
-  },
-  "src/pages/nfl/teams/+page.md": {
-    "file": "entries/pages/nfl/teams/_page.md.js",
-    "name": "entries/pages/nfl/teams/_page.md",
-    "src": "src/pages/nfl/teams/+page.md",
-    "isEntry": true,
-    "isDynamicEntry": true,
-    "imports": [
-      "_utils.js",
-      "_ssr.js",
-      "_VennDiagram.svelte_svelte_type_style_lang.js",
-      "_stores.js",
-      "_buildQuery.js",
-      "_index2.js",
-      "_inferColumnTypes.js",
-      "_DataTable.js",
-      "_stores2.js",
-      "_profile.js",
-      "_QueryViewer.js"
-    ]
-  },
-  "src/pages/nfl/teams/[nfl_teams]/+page.md": {
-    "file": "entries/pages/nfl/teams/_nfl_teams_/_page.md.js",
-    "name": "entries/pages/nfl/teams/_nfl_teams_/_page.md",
-    "src": "src/pages/nfl/teams/[nfl_teams]/+page.md",
-    "isEntry": true,
-    "isDynamicEntry": true,
-    "imports": [
-      "_utils.js",
-      "_ssr.js",
-      "_VennDiagram.svelte_svelte_type_style_lang.js",
-      "_stores.js",
-      "_buildQuery.js",
-      "_index2.js",
-      "_inferColumnTypes.js",
-      "_DataTable.js",
-      "_stores2.js",
-      "_AreaChart.js",
-      "_BarChart.js",
-      "_BigValue.js",
-      "_LineChart.js",
-      "_Value.js",
-      "_profile.js",
-      "_QueryViewer.js"
-    ]
-  },
   "src/pages/settings/+layout.server.js": {
     "file": "entries/pages/settings/_layout.server.js",
     "name": "entries/pages/settings/_layout.server",
@@ -1362,15 +770,8 @@
       "_inferColumnTypes.js",
       "_DataTable.js",
       "_stores2.js",
-      "_AreaChart.js",
-      "_BarChart.js",
-      "_BigValue.js",
-      "_getCompletedData.js",
-      "_LineChart.js",
-      "_Value.js",
-      "_profile.js",
-      "_QueryViewer.js",
-      "_ButtonGroup.js"
+      "_index3.js",
+      "_profile.js"
     ]
   }
 }

@@ -3,7 +3,7 @@ import path from 'path';
 import preprocessor from '@evidence-dev/preprocess';
 import { json } from '@sveltejs/kit';
 
-export const prerender = true;
+export const prerender = false;
 
 /** @type {import("./$types").RequestHandler} */
 export async function GET({ params: { route } }) {

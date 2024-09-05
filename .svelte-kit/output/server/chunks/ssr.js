@@ -1,4 +1,4 @@
-import { r as run_all, f as blank_object } from "./utils.js";
+import { r as run_all, h as blank_object } from "./utils.js";
 function custom_event(type, detail, { bubbles = false, cancelable = false } = {}) {
   return new CustomEvent(type, { detail, bubbles, cancelable });
 }

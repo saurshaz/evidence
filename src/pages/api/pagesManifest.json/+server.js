@@ -7,7 +7,7 @@ import { error } from '@sveltejs/kit';
 const pages = import.meta.glob(['/src/pages/**/+page.md']);
 const pagePaths = Object.keys(pages).map((path) => path.replace('/src/pages/', ''));
 
-export const prerender = true;
+export const prerender = false;
 
 // Convert children objects into arrays of objects
 function convertChildrenToArray(node) {

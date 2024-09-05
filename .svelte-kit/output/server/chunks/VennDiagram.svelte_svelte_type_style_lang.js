@@ -3,10 +3,8 @@ import { Query } from "@evidence-dev/sdk/usql";
 import "@uwdata/mosaic-sql";
 import "@evidence-dev/universal-sql/client-duckdb";
 import "./inferColumnTypes.js";
-import { r as run_all, g as get_store_value, c as compute_rest_props } from "./utils.js";
-import { j as set_current_component, k as current_component, o as onDestroy, c as create_ssr_component, a as spread, b as escape_object, e as escape_attribute_value, h as escape, i as each, d as add_attribute, v as validate_component, g as getContext, s as setContext } from "./ssr.js";
-import { d as derived, w as writable, r as readable } from "./index2.js";
 import { nanoid } from "nanoid/non-secure";
+import { d as derived, w as writable, r as readable } from "./index2.js";
 import { tv } from "tailwind-variants";
 import "lodash.debounce";
 import "ssf";
@@ -23,79 +21,11 @@ import "export-to-csv";
 import "echarts";
 import "prismjs";
 import "./stores.js";
+import { g as get_store_value, c as compute_rest_props } from "./utils.js";
 import { o as onMount } from "./ssr2.js";
+import { o as onDestroy, c as create_ssr_component, a as spread, b as escape_object, e as escape_attribute_value, h as escape, i as each, d as add_attribute, v as validate_component } from "./ssr.js";
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
-const dirty_components = [];
-const binding_callbacks = [];
-let render_callbacks = [];
-const flush_callbacks = [];
-const resolved_promise = /* @__PURE__ */ Promise.resolve();
-let update_scheduled = false;
-function schedule_update() {
-  if (!update_scheduled) {
-    update_scheduled = true;
-    resolved_promise.then(flush);
-  }
-}
-function tick() {
-  schedule_update();
-  return resolved_promise;
-}
-function add_render_callback(fn) {
-  render_callbacks.push(fn);
-}
-const seen_callbacks = /* @__PURE__ */ new Set();
-let flushidx = 0;
-function flush() {
-  if (flushidx !== 0) {
-    return;
-  }
-  const saved_component = current_component;
-  do {
-    try {
-      while (flushidx < dirty_components.length) {
-        const component = dirty_components[flushidx];
-        flushidx++;
-        set_current_component(component);
-        update(component.$$);
-      }
-    } catch (e) {
-      dirty_components.length = 0;
-      flushidx = 0;
-      throw e;
-    }
-    set_current_component(null);
-    dirty_components.length = 0;
-    flushidx = 0;
-    while (binding_callbacks.length)
-      binding_callbacks.pop()();
-    for (let i = 0; i < render_callbacks.length; i += 1) {
-      const callback = render_callbacks[i];
-      if (!seen_callbacks.has(callback)) {
-        seen_callbacks.add(callback);
-        callback();
-      }
-    }
-    render_callbacks.length = 0;
-  } while (dirty_components.length);
-  while (flush_callbacks.length) {
-    flush_callbacks.pop()();
-  }
-  update_scheduled = false;
-  seen_callbacks.clear();
-  set_current_component(saved_component);
-}
-function update($$) {
-  if ($$.fragment !== null) {
-    $$.update();
-    run_all($$.before_update);
-    const dirty = $$.dirty;
-    $$.dirty = [-1];
-    $$.fragment && $$.fragment.p($$.ctx, dirty);
-    $$.after_update.forEach(add_render_callback);
-  }
-}
 function styleToString$2(style) {
   return Object.keys(style).reduce((str, key) => {
     if (style[key] === void 0)
@@ -134,10 +64,10 @@ function lightable(value) {
   return { subscribe };
 }
 function getElementByMeltId(id) {
-  if (!isBrowser$1)
+  if (!isBrowser)
     return null;
   const el = document.querySelector(`[data-melt-id="${id}"]`);
-  return isHTMLElement$1(el) ? el : null;
+  return isHTMLElement(el) ? el : null;
 }
 const hiddenAction = (obj) => {
   return new Proxy(obj, {
@@ -202,18 +132,6 @@ function makeElement(name, args) {
   actionFn.subscribe = derivedStore.subscribe;
   return actionFn;
 }
-function makeElementArray(name, args) {
-  const { stores, returned, action } = args;
-  const { subscribe } = derived(stores, (values) => returned(values).map((value) => hiddenAction({
-    ...value,
-    [`data-melt-${name}`]: "",
-    action: action ?? noop
-  })));
-  const actionFn = action ?? (() => {
-  });
-  actionFn.subscribe = subscribe;
-  return actionFn;
-}
 function createElHelpers(prefix) {
   const name = (part) => part ? `${prefix}-${part}` : prefix;
   const attribute = (part) => `data-melt-${prefix}${part ? `-${part}` : ""}`;
@@ -226,12 +144,12 @@ function createElHelpers(prefix) {
     getEl
   };
 }
-const isBrowser$1 = typeof document !== "undefined";
+const isBrowser = typeof document !== "undefined";
 const isFunction = (v) => typeof v === "function";
 function isElement(element) {
   return element instanceof Element;
 }
-function isHTMLElement$1(element) {
+function isHTMLElement(element) {
   return element instanceof HTMLElement;
 }
 function isElementDisabled(element) {
@@ -280,7 +198,7 @@ function addMeltEventListener(target, event, handler, options) {
 }
 function dispatchMeltEvent(originalEvent) {
   const node = originalEvent.currentTarget;
-  if (!isHTMLElement$1(node))
+  if (!isHTMLElement(node))
     return null;
   const customMeltEvent = new CustomEvent(`m-${originalEvent.type}`, {
     detail: {
@@ -313,7 +231,7 @@ const safeOnDestroy = (fn) => {
     return fn;
   }
 };
-function omit$1(obj, ...keys) {
+function omit(obj, ...keys) {
   const result = {};
   for (const key of Object.keys(obj)) {
     if (!keys.includes(key)) {
@@ -378,7 +296,7 @@ withGet.derived = function(stores, fn) {
     subscribe
   };
 };
-const kbd$2 = {
+const kbd$1 = {
   ALT: "Alt",
   ARROW_DOWN: "ArrowDown",
   ARROW_LEFT: "ArrowLeft",
@@ -415,10 +333,10 @@ const kbd$2 = {
   A: "a",
   P: "p"
 };
-const FIRST_KEYS = [kbd$2.ARROW_DOWN, kbd$2.PAGE_UP, kbd$2.HOME];
-const LAST_KEYS = [kbd$2.ARROW_UP, kbd$2.PAGE_DOWN, kbd$2.END];
+const FIRST_KEYS = [kbd$1.ARROW_DOWN, kbd$1.PAGE_UP, kbd$1.HOME];
+const LAST_KEYS = [kbd$1.ARROW_UP, kbd$1.PAGE_DOWN, kbd$1.END];
 const FIRST_LAST_KEYS = [...FIRST_KEYS, ...LAST_KEYS];
-const SELECTION_KEYS = [kbd$2.ENTER, kbd$2.SPACE];
+const SELECTION_KEYS = [kbd$1.ENTER, kbd$1.SPACE];
 function effect(stores, fn) {
   let cb = void 0;
   const destroy = derived(stores, (stores2) => {
@@ -445,7 +363,7 @@ readable(void 0, (set) => {
 });
 const documentEscapeKeyStore = readable(void 0, (set) => {
   function keydown(event) {
-    if (event && event.key === kbd$2.ESCAPE) {
+    if (event && event.key === kbd$1.ESCAPE) {
       set(event);
     }
     set(void 0);
@@ -457,7 +375,7 @@ const documentEscapeKeyStore = readable(void 0, (set) => {
 });
 const useEscapeKeydown = (node, config = {}) => {
   let unsub = noop;
-  function update2(config2 = {}) {
+  function update(config2 = {}) {
     unsub();
     const options = { enabled: true, ...config2 };
     const enabled = isReadable(options.enabled) ? options.enabled : readable(options.enabled);
@@ -467,7 +385,7 @@ const useEscapeKeydown = (node, config = {}) => {
         if (!e || !get_store_value(enabled))
           return;
         const target = e.target;
-        if (!isHTMLElement$1(target) || target.closest("[data-escapee]") !== node) {
+        if (!isHTMLElement(target) || target.closest("[data-escapee]") !== node) {
           return;
         }
         e.preventDefault();
@@ -493,9 +411,9 @@ const useEscapeKeydown = (node, config = {}) => {
       })
     );
   }
-  update2(config);
+  update(config);
   return {
-    update: update2,
+    update,
     destroy() {
       node.removeAttribute("data-escapee");
       unsub();
@@ -508,7 +426,7 @@ const useEscapeKeydown = (node, config = {}) => {
   required: readable(false),
   name: readable(void 0)
 });
-const defaults$1 = {
+const defaults = {
   isDateDisabled: void 0,
   isDateUnavailable: void 0,
   value: void 0,
@@ -544,7 +462,7 @@ const defaults$1 = {
   minValue: void 0,
   maxValue: void 0,
   weekdayFormat: "narrow",
-  ...omit$1(defaults$1, "isDateDisabled", "isDateUnavailable", "value", "locale", "disabled", "readonly", "minValue", "maxValue", "weekdayFormat")
+  ...omit(defaults, "isDateDisabled", "isDateUnavailable", "value", "locale", "disabled", "readonly", "minValue", "maxValue", "weekdayFormat")
 });
 function cubicOut(t) {
   const f = t - 1;
@@ -754,127 +672,11 @@ function formatInput(string) {
 function commandScore(string, abbreviation) {
   return commandScoreInner(string, abbreviation, formatInput(string), formatInput(abbreviation), 0, 0, {});
 }
-const isBrowser = typeof document !== "undefined";
-function isHTMLElement(element) {
-  return element instanceof HTMLElement;
-}
-function isHTMLInputElement(element) {
-  return element instanceof HTMLInputElement;
-}
-function isUndefined(value) {
-  return value === void 0;
-}
 function generateId() {
   return nanoid(10);
 }
-const kbd$1 = {
-  ALT: "Alt",
-  ARROW_DOWN: "ArrowDown",
-  ARROW_LEFT: "ArrowLeft",
-  ARROW_RIGHT: "ArrowRight",
-  ARROW_UP: "ArrowUp",
-  BACKSPACE: "Backspace",
-  CAPS_LOCK: "CapsLock",
-  CONTROL: "Control",
-  DELETE: "Delete",
-  END: "End",
-  ENTER: "Enter",
-  ESCAPE: "Escape",
-  F1: "F1",
-  F10: "F10",
-  F11: "F11",
-  F12: "F12",
-  F2: "F2",
-  F3: "F3",
-  F4: "F4",
-  F5: "F5",
-  F6: "F6",
-  F7: "F7",
-  F8: "F8",
-  F9: "F9",
-  HOME: "Home",
-  META: "Meta",
-  PAGE_DOWN: "PageDown",
-  PAGE_UP: "PageUp",
-  SHIFT: "Shift",
-  SPACE: " ",
-  TAB: "Tab",
-  CTRL: "Control",
-  ASTERISK: "*"
-};
-function omit(obj, ...keys) {
-  const result = {};
-  for (const key of Object.keys(obj)) {
-    if (!keys.includes(key)) {
-      result[key] = obj[key];
-    }
-  }
-  return result;
-}
-function removeUndefined(obj) {
-  const result = {};
-  for (const key in obj) {
-    const value = obj[key];
-    if (value !== void 0) {
-      result[key] = value;
-    }
-  }
-  return result;
-}
-function toWritableStores(properties) {
-  const result = {};
-  Object.keys(properties).forEach((key) => {
-    const propertyKey = key;
-    const value = properties[propertyKey];
-    result[propertyKey] = writable(value);
-  });
-  return result;
-}
-const NAME$m = "Command";
-const STATE_NAME = "CommandState";
-const GROUP_NAME = "CommandGroup";
-const LIST_SELECTOR = `[data-cmdk-list-sizer]`;
-const GROUP_SELECTOR = `[data-cmdk-group]`;
-const GROUP_ITEMS_SELECTOR = `[data-cmdk-group-items]`;
-const GROUP_HEADING_SELECTOR = `[data-cmdk-group-heading]`;
-const ITEM_SELECTOR = `[data-cmdk-item]`;
-const VALID_ITEM_SELECTOR = `${ITEM_SELECTOR}:not([aria-disabled="true"])`;
-const VALUE_ATTR = `data-value`;
 const defaultFilter = (value, search) => commandScore(value, search);
-function getCtx() {
-  return getContext(NAME$m);
-}
-function getState() {
-  return getContext(STATE_NAME);
-}
-function createGroup(alwaysRender) {
-  const id = generateId();
-  setContext(GROUP_NAME, {
-    id,
-    alwaysRender: isUndefined(alwaysRender) ? false : alwaysRender
-  });
-  return { id };
-}
-function getGroup() {
-  const context = getContext(GROUP_NAME);
-  if (!context)
-    return void 0;
-  return context;
-}
-function createState(initialValues) {
-  const defaultState = {
-    search: "",
-    value: "",
-    filtered: {
-      count: 0,
-      items: /* @__PURE__ */ new Map(),
-      groups: /* @__PURE__ */ new Set()
-    }
-  };
-  const state = writable(initialValues ? { ...defaultState, ...removeUndefined(initialValues) } : defaultState);
-  return state;
-}
-const defaults = {
+({
   label: "Command menu",
   shouldFilter: true,
   loop: false,
@@ -887,388 +689,7 @@ const defaults = {
     label: generateId(),
     input: generateId()
   }
-};
-function createCommand(props) {
-  const ids = {
-    root: generateId(),
-    list: generateId(),
-    label: generateId(),
-    input: generateId(),
-    ...props.ids
-  };
-  const withDefaults = {
-    ...defaults,
-    ...removeUndefined(props)
-  };
-  const state = props.state ?? createState({
-    value: withDefaults.value
-  });
-  const allItems = writable(/* @__PURE__ */ new Set());
-  const allGroups = writable(/* @__PURE__ */ new Map());
-  const allIds = writable(/* @__PURE__ */ new Map());
-  const commandEl = writable(null);
-  const options = toWritableStores(omit(withDefaults, "value", "ids"));
-  const { shouldFilter, loop, filter, label } = options;
-  const context = {
-    value: (id, value) => {
-      if (value !== get_store_value(allIds).get(id)) {
-        allIds.update(($allIds) => {
-          $allIds.set(id, value);
-          return $allIds;
-        });
-        state.update(($state) => {
-          $state.filtered.items.set(id, score(value, $state.search));
-          const sortedState = sort($state, get_store_value(shouldFilter));
-          return sortedState;
-        });
-      }
-    },
-    // Track item lifecycle (add/remove)
-    item: (id, groupId) => {
-      allItems.update(($allItems) => $allItems.add(id));
-      if (groupId) {
-        allGroups.update(($allGroups) => {
-          if (!$allGroups.has(groupId)) {
-            $allGroups.set(groupId, /* @__PURE__ */ new Set([id]));
-          } else {
-            $allGroups.get(groupId)?.add(id);
-          }
-          return $allGroups;
-        });
-      }
-      state.update(($state) => {
-        const $shouldFilter = get_store_value(shouldFilter);
-        const filteredState = filterItems($state, $shouldFilter);
-        const sortedState = sort(filteredState, $shouldFilter);
-        if (!sortedState.value) {
-          const value = selectFirstItem();
-          sortedState.value = value ?? "";
-        }
-        return sortedState;
-      });
-      return () => {
-        allIds.update(($allIds) => {
-          $allIds.delete(id);
-          return $allIds;
-        });
-        allItems.update(($allItems) => {
-          $allItems.delete(id);
-          return $allItems;
-        });
-        state.update(($state) => {
-          $state.filtered.items.delete(id);
-          const selectedItem = getSelectedItem();
-          const filteredState = filterItems($state);
-          if (selectedItem?.getAttribute("id") === id) {
-            filteredState.value = selectFirstItem() ?? "";
-          }
-          return $state;
-        });
-      };
-    },
-    group: (id) => {
-      allGroups.update(($allGroups) => {
-        if (!$allGroups.has(id)) {
-          $allGroups.set(id, /* @__PURE__ */ new Set());
-        }
-        return $allGroups;
-      });
-      return () => {
-        allIds.update(($allIds) => {
-          $allIds.delete(id);
-          return $allIds;
-        });
-        allGroups.update(($allGroups) => {
-          $allGroups.delete(id);
-          return $allGroups;
-        });
-      };
-    },
-    filter: () => {
-      return get_store_value(shouldFilter);
-    },
-    label: get_store_value(label) || props["aria-label"] || "",
-    commandEl,
-    ids,
-    updateState
-  };
-  function updateState(key, value, preventScroll) {
-    const $shouldFilter = get_store_value(shouldFilter);
-    state.update((curr) => {
-      if (Object.is(curr[key], value))
-        return curr;
-      curr[key] = value;
-      if (key === "search") {
-        const filteredState = filterItems(curr, $shouldFilter);
-        curr = filteredState;
-        const sortedState = sort(curr, $shouldFilter);
-        curr = sortedState;
-        tick().then(() => state.update((curr2) => {
-          curr2.value = selectFirstItem() ?? "";
-          return curr2;
-        }));
-      } else if (key === "value") {
-        props.onValueChange?.(curr.value);
-        if (!preventScroll) {
-          tick().then(() => scrollSelectedIntoView());
-        }
-      }
-      return curr;
-    });
-  }
-  function filterItems(state2, shouldFilterVal) {
-    const $shouldFilter = shouldFilterVal ?? get_store_value(shouldFilter);
-    const $allItems = get_store_value(allItems);
-    const $allIds = get_store_value(allIds);
-    if (!state2.search || !$shouldFilter) {
-      state2.filtered.count = $allItems.size;
-      return state2;
-    }
-    state2.filtered.groups = /* @__PURE__ */ new Set();
-    let itemCount = 0;
-    for (const id of $allItems) {
-      const value = $allIds.get(id);
-      const rank = score(value, state2.search);
-      state2.filtered.items.set(id, rank);
-      if (rank > 0) {
-        itemCount++;
-      }
-    }
-    for (const [groupId, group] of get_store_value(allGroups)) {
-      for (const itemId of group) {
-        const rank = state2.filtered.items.get(itemId);
-        if (rank && rank > 0) {
-          state2.filtered.groups.add(groupId);
-        }
-      }
-    }
-    state2.filtered.count = itemCount;
-    return state2;
-  }
-  function sort(state2, shouldFilterVal) {
-    const $shouldFilter = shouldFilterVal ?? get_store_value(shouldFilter);
-    if (!state2.search || !$shouldFilter) {
-      return state2;
-    }
-    const scores = state2.filtered.items;
-    const groups = [];
-    const $allGroups = get_store_value(allGroups);
-    state2.filtered.groups.forEach((value) => {
-      const items = $allGroups.get(value);
-      if (!items)
-        return;
-      let max = 0;
-      items.forEach((item) => {
-        const score2 = scores.get(item);
-        if (isUndefined(score2))
-          return;
-        max = Math.max(score2, max);
-      });
-      groups.push([value, max]);
-    });
-    const rootEl = document.getElementById(ids.root);
-    if (!rootEl)
-      return state2;
-    const list = rootEl.querySelector(LIST_SELECTOR);
-    getValidItems(rootEl).sort((a, b) => {
-      const valueA = a.getAttribute(VALUE_ATTR) ?? "";
-      const valueB = b.getAttribute(VALUE_ATTR) ?? "";
-      return (scores.get(valueA) ?? 0) - (scores.get(valueB) ?? 0);
-    }).forEach((item) => {
-      const group = item.closest(GROUP_ITEMS_SELECTOR);
-      const closest = item.closest(`${GROUP_ITEMS_SELECTOR} > *`);
-      if (isHTMLElement(group)) {
-        if (item.parentElement === group) {
-          group.appendChild(item);
-        } else {
-          if (!isHTMLElement(closest))
-            return;
-          group.appendChild(closest);
-        }
-      } else {
-        if (!isHTMLElement(list))
-          return;
-        if (item.parentElement === list) {
-          list.appendChild(item);
-        } else {
-          if (!isHTMLElement(closest))
-            return;
-          list.appendChild(closest);
-        }
-      }
-    });
-    groups.sort((a, b) => b[1] - a[1]).forEach((group) => {
-      const el = rootEl.querySelector(`${GROUP_SELECTOR}[${VALUE_ATTR}="${group[0]}"]`);
-      if (!isHTMLElement(el))
-        return;
-      el.parentElement?.appendChild(el);
-    });
-    return state2;
-  }
-  function selectFirstItem() {
-    const item = getValidItems().find((item2) => !item2.ariaDisabled);
-    if (!item)
-      return;
-    const value = item.getAttribute(VALUE_ATTR);
-    if (!value)
-      return;
-    return value;
-  }
-  function score(value, search) {
-    const lowerCaseAndTrimmedValue = value?.toLowerCase().trim();
-    const filterFn = get_store_value(filter);
-    if (!filterFn) {
-      return lowerCaseAndTrimmedValue ? defaultFilter(lowerCaseAndTrimmedValue, search) : 0;
-    }
-    return lowerCaseAndTrimmedValue ? filterFn(lowerCaseAndTrimmedValue, search) : 0;
-  }
-  function scrollSelectedIntoView() {
-    const item = getSelectedItem();
-    if (!item) {
-      return;
-    }
-    if (item.parentElement?.firstChild === item) {
-      tick().then(() => item.closest(GROUP_SELECTOR)?.querySelector(GROUP_HEADING_SELECTOR)?.scrollIntoView({
-        block: "nearest"
-      }));
-    }
-    tick().then(() => item.scrollIntoView({ block: "nearest" }));
-  }
-  function getValidItems(rootElement) {
-    const rootEl = rootElement ?? document.getElementById(ids.root);
-    if (!rootEl)
-      return [];
-    return Array.from(rootEl.querySelectorAll(VALID_ITEM_SELECTOR)).filter((el) => isHTMLElement(el));
-  }
-  function getSelectedItem(rootElement) {
-    const rootEl = document.getElementById(ids.root);
-    if (!rootEl)
-      return;
-    const selectedEl = rootEl.querySelector(`${VALID_ITEM_SELECTOR}[aria-selected="true"]`);
-    if (!isHTMLElement(selectedEl))
-      return null;
-    return selectedEl;
-  }
-  function updateSelectedToIndex(index) {
-    const rootEl = document.getElementById(ids.root);
-    if (!rootEl)
-      return;
-    const items = getValidItems(rootEl);
-    const item = items[index];
-    if (!item)
-      return;
-  }
-  function updateSelectedByChange(change) {
-    const selected = getSelectedItem();
-    const items = getValidItems();
-    const index = items.findIndex((item) => item === selected);
-    let newSelected = items[index + change];
-    if (get_store_value(loop)) {
-      if (index + change < 0) {
-        newSelected = items[items.length - 1];
-      } else if (index + change === items.length) {
-        newSelected = items[0];
-      } else {
-        newSelected = items[index + change];
-      }
-    }
-    if (newSelected) {
-      updateState("value", newSelected.getAttribute(VALUE_ATTR) ?? "");
-    }
-  }
-  function updateSelectedToGroup(change) {
-    const selected = getSelectedItem();
-    let group = selected?.closest(GROUP_SELECTOR);
-    let item = void 0;
-    while (group && !item) {
-      group = change > 0 ? findNextSibling(group, GROUP_SELECTOR) : findPreviousSibling(group, GROUP_SELECTOR);
-      item = group?.querySelector(VALID_ITEM_SELECTOR);
-    }
-    if (item) {
-      updateState("value", item.getAttribute(VALUE_ATTR) ?? "");
-    } else {
-      updateSelectedByChange(change);
-    }
-  }
-  function last() {
-    return updateSelectedToIndex(getValidItems().length - 1);
-  }
-  function next(e) {
-    e.preventDefault();
-    if (e.metaKey) {
-      last();
-    } else if (e.altKey) {
-      updateSelectedToGroup(1);
-    } else {
-      updateSelectedByChange(1);
-    }
-  }
-  function prev(e) {
-    e.preventDefault();
-    if (e.metaKey) {
-      updateSelectedToIndex(0);
-    } else if (e.altKey) {
-      updateSelectedToGroup(-1);
-    } else {
-      updateSelectedByChange(-1);
-    }
-  }
-  function handleRootKeydown(e) {
-    switch (e.key) {
-      case kbd$1.ARROW_DOWN:
-        next(e);
-        break;
-      case kbd$1.ARROW_UP:
-        prev(e);
-        break;
-      case kbd$1.HOME:
-        e.preventDefault();
-        updateSelectedToIndex(0);
-        break;
-      case kbd$1.END:
-        e.preventDefault();
-        last();
-        break;
-      case kbd$1.ENTER: {
-        e.preventDefault();
-        const item = getSelectedItem();
-        if (item) {
-          item.click();
-        }
-      }
-    }
-  }
-  setContext(NAME$m, context);
-  const stateStore = {
-    subscribe: state.subscribe,
-    update: state.update,
-    set: state.set,
-    updateState
-  };
-  setContext(STATE_NAME, stateStore);
-  return {
-    state: stateStore,
-    handleRootKeydown,
-    commandEl,
-    ids
-  };
-}
-function findNextSibling(el, selector) {
-  let sibling = el.nextElementSibling;
-  while (sibling) {
-    if (sibling.matches(selector))
-      return sibling;
-    sibling = sibling.nextElementSibling;
-  }
-}
-function findPreviousSibling(el, selector) {
-  let sibling = el.previousElementSibling;
-  while (sibling) {
-    if (sibling.matches(selector))
-      return sibling;
-    sibling = sibling.previousElementSibling;
-  }
-}
+});
 function styleToString$1(style) {
   return Object.keys(style).reduce((str, key) => {
     if (style[key] === void 0)
@@ -1534,7 +955,7 @@ const buttonVariants = tv({
     size: "default"
   }
 });
-const badgeVariants = tv({
+tv({
   base: "inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 select-none",
   variants: {
     variant: {
@@ -1575,47 +996,32 @@ console.log("loading componengts ....");
 ];
 console.log(" --- test logging---");
 export {
-  createGroup as A,
   Button as B,
-  getCtx as C,
-  generateId as D,
-  isBrowser as E,
   FIRST_LAST_KEYS as F,
-  ITEM_SELECTOR as G,
-  isHTMLInputElement as H,
   Icon as I,
-  getGroup as J,
-  isUndefined as K,
-  isHTMLElement as L,
-  badgeVariants as M,
-  isFunction as N,
-  buttonVariants as O,
   SELECTION_KEYS as S,
-  VALUE_ATTR as V,
-  isHTMLElement$1 as a,
-  executeCallbacks as b,
-  addMeltEventListener as c,
-  isElementDisabled as d,
-  effect as e,
-  safeOnMount as f,
-  addEventListener$1 as g,
-  createElHelpers as h,
-  isBrowser$1 as i,
-  disabledAttr as j,
-  kbd$2 as k,
-  cn as l,
+  isHTMLElement as a,
+  isFunction as b,
+  isElement as c,
+  addEventListener$1 as d,
+  executeCallbacks as e,
+  effect as f,
+  addMeltEventListener as g,
+  isElementDisabled as h,
+  isBrowser as i,
+  safeOnMount as j,
+  kbd$1 as k,
+  createElHelpers as l,
   makeElement as m,
   noop as n,
-  omit$1 as o,
+  disabledAttr as o,
   portalAttr as p,
-  flyAndScale as q,
-  makeElementArray as r,
+  omit as q,
+  cn as r,
   styleToString$2 as s,
-  tick as t,
+  buttonVariants as t,
   useEscapeKeydown as u,
-  getElementByMeltId as v,
+  flyAndScale as v,
   withGet as w,
-  isElement as x,
-  createCommand as y,
-  getState as z
+  getElementByMeltId as x
 };

@@ -42,60 +42,6 @@
 		"src/pages/explore/+layout.js",
 		"src/pages/+layout.js"
 	],
-	"/nba": [
-		"src/pages/+layout.js"
-	],
-	"/nba/Lakers_vs_Clippers": [
-		"src/pages/+layout.js"
-	],
-	"/nba/advanced": [
-		"src/pages/+layout.js"
-	],
-	"/nba/historical_matchups": [
-		"src/pages/+layout.js"
-	],
-	"/nba/in-season tournament": [
-		"src/pages/+layout.js"
-	],
-	"/nba/predictions": [
-		"src/pages/+layout.js"
-	],
-	"/nba/teams": [
-		"src/pages/+layout.js"
-	],
-	"/nba/teams/[nba_teams]": [
-		"src/pages/+layout.js"
-	],
-	"/ncaaf": [
-		"src/pages/+layout.js"
-	],
-	"/ncaaf/conferences": [
-		"src/pages/+layout.js"
-	],
-	"/ncaaf/conferences/[ncaaf_conferences]": [
-		"src/pages/+layout.js"
-	],
-	"/ncaaf/predictions": [
-		"src/pages/+layout.js"
-	],
-	"/ncaaf/teams": [
-		"src/pages/+layout.js"
-	],
-	"/ncaaf/teams/[ncaaf_teams]": [
-		"src/pages/+layout.js"
-	],
-	"/nfl": [
-		"src/pages/+layout.js"
-	],
-	"/nfl/predictions": [
-		"src/pages/+layout.js"
-	],
-	"/nfl/teams": [
-		"src/pages/+layout.js"
-	],
-	"/nfl/teams/[nfl_teams]": [
-		"src/pages/+layout.js"
-	],
 	"/settings": [
 		"src/pages/settings/+page.js",
 		"src/pages/settings/+page.server.js",

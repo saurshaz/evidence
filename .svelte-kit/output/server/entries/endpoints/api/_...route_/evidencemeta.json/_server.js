@@ -2,7 +2,7 @@ import fs from "fs/promises";
 import path from "path";
 import preprocessor from "@evidence-dev/preprocess";
 import { j as json } from "../../../../../chunks/index.js";
-const prerender = true;
+const prerender = false;
 async function GET({ params: { route } }) {
   let routesDir;
   if ((await fs.readdir(process.cwd())).includes("src")) {

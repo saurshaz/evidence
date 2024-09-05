@@ -746,8 +746,8 @@ export {
   EvidenceType as E,
   TypeFidelity as T,
   autoFormat as a,
-  findImplicitAutoFormat as b,
+  fallbackFormat as b,
   inferColumnTypes as c,
-  fallbackFormat as f,
+  findImplicitAutoFormat as f,
   isAutoFormat as i
 };

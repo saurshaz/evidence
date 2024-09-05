@@ -12,8 +12,8 @@ type EnsureDefined<T> = T extends null | undefined ? {} : T;
 type OptionalUnion<U extends Record<string, any>, A extends keyof U = U extends U ? keyof U : never> = U extends unknown ? { [P in Exclude<A, keyof U>]?: never } & U : never;
 export type Snapshot<T = any> = Kit.Snapshot<T>;
 type PageParentData = EnsureDefined<LayoutData>;
-type LayoutRouteId = RouteId | "/" | "/about" | "/about/how_it_works" | "/explore/console" | "/explore/schema" | "/nba" | "/nba/Lakers_vs_Clippers" | "/nba/advanced" | "/nba/historical_matchups" | "/nba/in-season tournament" | "/nba/predictions" | "/nba/teams" | "/nba/teams/[nba_teams]" | "/ncaaf" | "/ncaaf/conferences" | "/ncaaf/conferences/[ncaaf_conferences]" | "/ncaaf/predictions" | "/ncaaf/teams" | "/ncaaf/teams/[ncaaf_teams]" | "/nfl" | "/nfl/predictions" | "/nfl/teams" | "/nfl/teams/[nfl_teams]" | "/settings" | "/test" | null
-type LayoutParams = RouteParams & { nba_teams?: string; ncaaf_conferences?: string; ncaaf_teams?: string; nfl_teams?: string }
+type LayoutRouteId = RouteId | "/" | "/about" | "/about/how_it_works" | "/explore/console" | "/explore/schema" | "/settings" | "/test" | null
+type LayoutParams = RouteParams & {  }
 type LayoutParentData = EnsureDefined<{}>;
 
 export type PageServerData = null;

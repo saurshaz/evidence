@@ -1,6 +1,6 @@
 import { s as subscribe, a as set_store_value, n as null_to_empty, c as compute_rest_props, b as noop } from "../../../chunks/utils.js";
 import { c as create_ssr_component, g as getContext, s as setContext, h as escape, v as validate_component, i as each, d as add_attribute, f as createEventDispatcher, o as onDestroy } from "../../../chunks/ssr.js";
-import "../../../chunks/VennDiagram.svelte_svelte_type_style_lang.js";
+import { y as throttle, z as init, A as connect } from "../../../chunks/VennDiagram.svelte_svelte_type_style_lang.js";
 import { s as showQueries, l as localStorageStore, p as pageHasQueries, r as routeHash } from "../../../chunks/stores.js";
 import { Query, hasUnsetValues } from "@evidence-dev/sdk/usql";
 import { a as buildReactiveInputQuery, I as INPUTS_CONTEXT_KEY, s as setQueryFunction, C as CUSTOM_FORMATTING_SETTINGS_CONTEXT_KEY } from "../../../chunks/buildQuery.js";
@@ -15,7 +15,6 @@ import "@astronautlabs/jsonpath";
 import "dequal";
 import { p as page } from "../../../chunks/stores2.js";
 import "tua-body-scroll-lock";
-import { throttle, init, connect } from "echarts";
 import "debounce";
 import "downloadjs";
 import { b as browser } from "../../../chunks/index3.js";
@@ -60,7 +59,7 @@ const ButtonGroupItem = create_ssr_component(($$result, $$props, $$bindings, slo
     $$bindings.default(_default);
   $$unsubscribe_currentValue();
   return `<button type="button" class="${"flex-none py-1 font-medium h-8 px-3 text-xs truncate border-r last:border-none hover:bg-gray-100 focus:z-10 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-400 " + escape(
-    $currentValue?.value === value ? "z-10 border-gray-200 bg-gray-100 text-blue-700" : "z-0 bg-white-100 text-gray-900 border-gray-200",
+    $currentValue?.value === value ? "z-10 border-gray-200 bg-gray-100 text-blue-700" : "z-0 bg-white text-gray-900 border-gray-200",
     true
   )}">${escape(valueLabel)}</button>`;
 });

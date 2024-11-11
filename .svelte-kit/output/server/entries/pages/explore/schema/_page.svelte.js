@@ -17,7 +17,6 @@ import "yaml";
 import "@astronautlabs/jsonpath";
 import "dequal";
 import "tua-body-scroll-lock";
-import "echarts";
 import "debounce";
 import "downloadjs";
 import "echarts-stat";

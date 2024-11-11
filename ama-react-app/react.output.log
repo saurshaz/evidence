@@ -1,0 +1,504 @@
+
+> ama-react-app@1.0.0 start
+> react-scripts start
+
+Browserslist: caniuse-lite is outdated. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+(node:18717) [DEP_WEBPACK_DEV_SERVER_ON_AFTER_SETUP_MIDDLEWARE] DeprecationWarning: 'onAfterSetupMiddleware' option is deprecated. Please use the 'setupMiddlewares' option.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:18717) [DEP_WEBPACK_DEV_SERVER_ON_BEFORE_SETUP_MIDDLEWARE] DeprecationWarning: 'onBeforeSetupMiddleware' option is deprecated. Please use the 'setupMiddlewares' option.
+Starting the development server...
+
+Compiled successfully!
+
+You can now view ama-react-app in the browser.
+
+  Local:            http://localhost:3000
+  On Your Network:  http://10.0.0.109:3000
+
+Note that the development build is not optimized.
+To create a production build, use npm run build.
+
+webpack compiled successfully
+Files successfully emitted, waiting for typecheck results...
+Issues checking in progress...
+No issues found.
+Compiling...
+Compiled successfully!
+webpack compiled successfully
+Compiling...
+No issues found.
+Compiled successfully!
+webpack compiled successfully
+No issues found.
+Compiling...
+Compiled successfully!
+webpack compiled successfully
+No issues found.
+Compiling...
+Compiled successfully!
+webpack compiled successfully
+No issues found.
+Compiling...
+Compiled successfully!
+webpack compiled successfully
+No issues found.
+Compiling...
+Compiled successfully!
+webpack compiled successfully
+No issues found.
+[0;33mOne of your dependencies, babel-preset-react-app, is importing the
+"@babel/plugin-proposal-private-property-in-object" package without
+declaring it in its dependencies. This is currently working because
+"@babel/plugin-proposal-private-property-in-object" is already in your
+node_modules folder for unrelated reasons, but it [1mmay break at any time[0;33m.
+
+babel-preset-react-app is part of the create-react-app project, [1mwhich
+is not maintianed anymore[0;33m. It is thus unlikely that this bug will
+ever be fixed. Add "@babel/plugin-proposal-private-property-in-object" to
+your devDependencies to work around this error. This will make this message
+go away.[0m
+  
+Compiling...
+Compiled successfully!
+webpack compiled successfully
+No issues found.
+Compiling...
+Compiled successfully!
+webpack compiled successfully
+No issues found.
+Compiling...
+Compiled successfully!
+webpack compiled successfully
+No issues found.
+Compiling...
+Compiled successfully!
+webpack compiled successfully
+No issues found.
+Compiling...
+Failed to compile.
+
+[eslint] 
+src/pages/OnboardingPage.tsx
+Syntax error: Unexpected token (235:24) (235:24)
+ERROR in ./src/pages/OnboardingPage.tsx
+Module build failed (from ./node_modules/babel-loader/lib/index.js):
+SyntaxError: /home/dev/code/ama-data-bot/ama-react-app/src/pages/OnboardingPage.tsx: Unexpected token (235:24)
+
+  233 |       type: "checkbox",
+  234 |       label: "I agree to the Terms and Conditions",
+> 235 |       isRequired: false,# FIXME: DEMO: make it required
+      |                         ^
+  236 |       defaultValue: true,
+  237 |     },
+  238 |   ],
+    at constructor (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:353:19)
+    at TypeScriptParserMixin.raise (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:3277:19)
+    at TypeScriptParserMixin.unexpected (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:3297:16)
+    at TypeScriptParserMixin.parsePropertyName (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:11539:18)
+    at TypeScriptParserMixin.parsePropertyDefinition (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:11411:22)
+    at TypeScriptParserMixin.parseObjectLike (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:11354:21)
+    at TypeScriptParserMixin.parseExprAtom (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:10875:23)
+    at TypeScriptParserMixin.parseExprAtom (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:6821:20)
+    at TypeScriptParserMixin.parseExprSubscripts (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:10590:23)
+    at TypeScriptParserMixin.parseUpdate (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:10573:21)
+    at TypeScriptParserMixin.parseMaybeUnary (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:10551:23)
+    at TypeScriptParserMixin.parseMaybeUnary (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:9466:18)
+    at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:10405:61)
+    at TypeScriptParserMixin.parseExprOps (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:10410:23)
+    at TypeScriptParserMixin.parseMaybeConditional (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:10387:23)
+    at TypeScriptParserMixin.parseMaybeAssign (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:10348:21)
+    at TypeScriptParserMixin.parseMaybeAssign (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:9415:20)
+    at /home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:10318:39
+    at TypeScriptParserMixin.allowInAnd (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:11936:12)
+    at TypeScriptParserMixin.parseMaybeAssignAllowIn (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:10318:17)
+    at TypeScriptParserMixin.parseExprListItem (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:11696:18)
+    at TypeScriptParserMixin.parseExprList (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:11671:22)
+    at TypeScriptParserMixin.parseArrayLike (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:11573:26)
+    at TypeScriptParserMixin.parseArrayLike (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:8905:24)
+    at TypeScriptParserMixin.parseExprAtom (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:10866:23)
+    at TypeScriptParserMixin.parseExprAtom (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:6821:20)
+    at TypeScriptParserMixin.parseExprSubscripts (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:10590:23)
+    at TypeScriptParserMixin.parseUpdate (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:10573:21)
+    at TypeScriptParserMixin.parseMaybeUnary (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:10551:23)
+    at TypeScriptParserMixin.parseMaybeUnary (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:9466:18)
+    at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:10405:61)
+    at TypeScriptParserMixin.parseExprOps (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:10410:23)
+    at TypeScriptParserMixin.parseMaybeConditional (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:10387:23)
+    at TypeScriptParserMixin.parseMaybeAssign (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:10348:21)
+    at TypeScriptParserMixin.parseMaybeAssign (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:9415:20)
+    at /home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:10318:39
+    at TypeScriptParserMixin.allowInAnd (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:11936:12)
+    at TypeScriptParserMixin.parseMaybeAssignAllowIn (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:10318:17)
+    at TypeScriptParserMixin.parseObjectProperty (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:11469:83)
+    at TypeScriptParserMixin.parseObjPropValue (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:11494:100)
+    at TypeScriptParserMixin.parseObjPropValue (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:9373:18)
+    at TypeScriptParserMixin.parsePropertyDefinition (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:11434:17)
+    at TypeScriptParserMixin.parseObjectLike (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:11354:21)
+    at TypeScriptParserMixin.parseExprAtom (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:10875:23)
+    at TypeScriptParserMixin.parseExprAtom (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:6821:20)
+    at TypeScriptParserMixin.parseExprSubscripts (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:10590:23)
+    at TypeScriptParserMixin.parseUpdate (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:10573:21)
+    at TypeScriptParserMixin.parseMaybeUnary (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:10551:23)
+    at TypeScriptParserMixin.parseMaybeUnary (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:9466:18)
+    at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:10405:61)
+
+ERROR in [eslint] 
+src/pages/OnboardingPage.tsx
+  Line 235:24:  Parsing error: Unexpected token (235:24)
+
+webpack compiled with 2 errors
+ERROR in src/pages/OnboardingPage.tsx:235:25
+TS1127: Invalid character.
+    233 |       type: "checkbox",
+    234 |       label: "I agree to the Terms and Conditions",
+  > 235 |       isRequired: false,# FIXME: DEMO: make it required
+        |                         ^
+    236 |       defaultValue: true,
+    237 |     },
+    238 |   ],
+
+ERROR in src/pages/OnboardingPage.tsx:235:27
+TS1005: ':' expected.
+    233 |       type: "checkbox",
+    234 |       label: "I agree to the Terms and Conditions",
+  > 235 |       isRequired: false,# FIXME: DEMO: make it required
+        |                           ^^^^^
+    236 |       defaultValue: true,
+    237 |     },
+    238 |   ],
+
+ERROR in src/pages/OnboardingPage.tsx:235:27
+TS2304: Cannot find name 'FIXME'.
+    233 |       type: "checkbox",
+    234 |       label: "I agree to the Terms and Conditions",
+  > 235 |       isRequired: false,# FIXME: DEMO: make it required
+        |                           ^^^^^
+    236 |       defaultValue: true,
+    237 |     },
+    238 |   ],
+
+ERROR in src/pages/OnboardingPage.tsx:235:32
+TS1005: ',' expected.
+    233 |       type: "checkbox",
+    234 |       label: "I agree to the Terms and Conditions",
+  > 235 |       isRequired: false,# FIXME: DEMO: make it required
+        |                                ^
+    236 |       defaultValue: true,
+    237 |     },
+    238 |   ],
+
+ERROR in src/pages/OnboardingPage.tsx:235:40
+TS2304: Cannot find name 'make'.
+    233 |       type: "checkbox",
+    234 |       label: "I agree to the Terms and Conditions",
+  > 235 |       isRequired: false,# FIXME: DEMO: make it required
+        |                                        ^^^^
+    236 |       defaultValue: true,
+    237 |     },
+    238 |   ],
+
+ERROR in src/pages/OnboardingPage.tsx:235:45
+TS1005: ',' expected.
+    233 |       type: "checkbox",
+    234 |       label: "I agree to the Terms and Conditions",
+  > 235 |       isRequired: false,# FIXME: DEMO: make it required
+        |                                             ^^
+    236 |       defaultValue: true,
+    237 |     },
+    238 |   ],
+
+ERROR in src/pages/OnboardingPage.tsx:235:45
+TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+    233 |       type: "checkbox",
+    234 |       label: "I agree to the Terms and Conditions",
+  > 235 |       isRequired: false,# FIXME: DEMO: make it required
+        |                                             ^^
+    236 |       defaultValue: true,
+    237 |     },
+    238 |   ],
+
+ERROR in src/pages/OnboardingPage.tsx:235:48
+TS1005: ',' expected.
+    233 |       type: "checkbox",
+    234 |       label: "I agree to the Terms and Conditions",
+  > 235 |       isRequired: false,# FIXME: DEMO: make it required
+        |                                                ^^^^^^^^
+    236 |       defaultValue: true,
+    237 |     },
+    238 |   ],
+
+ERROR in src/pages/OnboardingPage.tsx:235:48
+TS2552: Cannot find name 'required'. Did you mean 'require'?
+    233 |       type: "checkbox",
+    234 |       label: "I agree to the Terms and Conditions",
+  > 235 |       isRequired: false,# FIXME: DEMO: make it required
+        |                                                ^^^^^^^^
+    236 |       defaultValue: true,
+    237 |     },
+    238 |   ],
+
+ERROR in src/pages/OnboardingPage.tsx:236:7
+TS1005: ',' expected.
+    234 |       label: "I agree to the Terms and Conditions",
+    235 |       isRequired: false,# FIXME: DEMO: make it required
+  > 236 |       defaultValue: true,
+        |       ^^^^^^^^^^^^
+    237 |     },
+    238 |   ],
+    239 |
+
+Compiling...
+Failed to compile.
+
+[eslint] 
+src/pages/OnboardingPage.tsx
+Syntax error: Unexpected token (235:24) (235:24)
+ERROR in ./src/pages/OnboardingPage.tsx
+Module build failed (from ./node_modules/babel-loader/lib/index.js):
+SyntaxError: /home/dev/code/ama-data-bot/ama-react-app/src/pages/OnboardingPage.tsx: Unexpected token (235:24)
+
+  233 |       type: "checkbox",
+  234 |       label: "I agree to the Terms and Conditions",
+> 235 |       isRequired: false,# FIXME: DEMO: make it required
+      |                         ^
+  236 |       defaultValue: true,
+  237 |     },
+  238 |   ],
+    at constructor (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:353:19)
+    at TypeScriptParserMixin.raise (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:3277:19)
+    at TypeScriptParserMixin.unexpected (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:3297:16)
+    at TypeScriptParserMixin.parsePropertyName (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:11539:18)
+    at TypeScriptParserMixin.parsePropertyDefinition (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:11411:22)
+    at TypeScriptParserMixin.parseObjectLike (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:11354:21)
+    at TypeScriptParserMixin.parseExprAtom (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:10875:23)
+    at TypeScriptParserMixin.parseExprAtom (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:6821:20)
+    at TypeScriptParserMixin.parseExprSubscripts (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:10590:23)
+    at TypeScriptParserMixin.parseUpdate (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:10573:21)
+    at TypeScriptParserMixin.parseMaybeUnary (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:10551:23)
+    at TypeScriptParserMixin.parseMaybeUnary (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:9466:18)
+    at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:10405:61)
+    at TypeScriptParserMixin.parseExprOps (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:10410:23)
+    at TypeScriptParserMixin.parseMaybeConditional (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:10387:23)
+    at TypeScriptParserMixin.parseMaybeAssign (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:10348:21)
+    at TypeScriptParserMixin.parseMaybeAssign (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:9415:20)
+    at /home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:10318:39
+    at TypeScriptParserMixin.allowInAnd (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:11936:12)
+    at TypeScriptParserMixin.parseMaybeAssignAllowIn (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:10318:17)
+    at TypeScriptParserMixin.parseExprListItem (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:11696:18)
+    at TypeScriptParserMixin.parseExprList (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:11671:22)
+    at TypeScriptParserMixin.parseArrayLike (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:11573:26)
+    at TypeScriptParserMixin.parseArrayLike (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:8905:24)
+    at TypeScriptParserMixin.parseExprAtom (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:10866:23)
+    at TypeScriptParserMixin.parseExprAtom (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:6821:20)
+    at TypeScriptParserMixin.parseExprSubscripts (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:10590:23)
+    at TypeScriptParserMixin.parseUpdate (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:10573:21)
+    at TypeScriptParserMixin.parseMaybeUnary (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:10551:23)
+    at TypeScriptParserMixin.parseMaybeUnary (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:9466:18)
+    at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:10405:61)
+    at TypeScriptParserMixin.parseExprOps (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:10410:23)
+    at TypeScriptParserMixin.parseMaybeConditional (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:10387:23)
+    at TypeScriptParserMixin.parseMaybeAssign (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:10348:21)
+    at TypeScriptParserMixin.parseMaybeAssign (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:9415:20)
+    at /home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:10318:39
+    at TypeScriptParserMixin.allowInAnd (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:11936:12)
+    at TypeScriptParserMixin.parseMaybeAssignAllowIn (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:10318:17)
+    at TypeScriptParserMixin.parseObjectProperty (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:11469:83)
+    at TypeScriptParserMixin.parseObjPropValue (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:11494:100)
+    at TypeScriptParserMixin.parseObjPropValue (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:9373:18)
+    at TypeScriptParserMixin.parsePropertyDefinition (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:11434:17)
+    at TypeScriptParserMixin.parseObjectLike (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:11354:21)
+    at TypeScriptParserMixin.parseExprAtom (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:10875:23)
+    at TypeScriptParserMixin.parseExprAtom (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:6821:20)
+    at TypeScriptParserMixin.parseExprSubscripts (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:10590:23)
+    at TypeScriptParserMixin.parseUpdate (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:10573:21)
+    at TypeScriptParserMixin.parseMaybeUnary (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:10551:23)
+    at TypeScriptParserMixin.parseMaybeUnary (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:9466:18)
+    at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (/home/dev/code/ama-data-bot/ama-react-app/node_modules/@babel/parser/lib/index.js:10405:61)
+
+ERROR in [eslint] 
+src/pages/OnboardingPage.tsx
+  Line 235:24:  Parsing error: Unexpected token (235:24)
+
+webpack compiled with 2 errors
+ERROR in src/pages/OnboardingPage.tsx:235:25
+TS1127: Invalid character.
+    233 |       type: "checkbox",
+    234 |       label: "I agree to the Terms and Conditions",
+  > 235 |       isRequired: false,# FIXME: DEMO: make it required
+        |                         ^
+    236 |       defaultValue: true,
+    237 |     },
+    238 |   ],
+
+ERROR in src/pages/OnboardingPage.tsx:235:27
+TS1005: ':' expected.
+    233 |       type: "checkbox",
+    234 |       label: "I agree to the Terms and Conditions",
+  > 235 |       isRequired: false,# FIXME: DEMO: make it required
+        |                           ^^^^^
+    236 |       defaultValue: true,
+    237 |     },
+    238 |   ],
+
+ERROR in src/pages/OnboardingPage.tsx:235:27
+TS2304: Cannot find name 'FIXME'.
+    233 |       type: "checkbox",
+    234 |       label: "I agree to the Terms and Conditions",
+  > 235 |       isRequired: false,# FIXME: DEMO: make it required
+        |                           ^^^^^
+    236 |       defaultValue: true,
+    237 |     },
+    238 |   ],
+
+ERROR in src/pages/OnboardingPage.tsx:235:32
+TS1005: ',' expected.
+    233 |       type: "checkbox",
+    234 |       label: "I agree to the Terms and Conditions",
+  > 235 |       isRequired: false,# FIXME: DEMO: make it required
+        |                                ^
+    236 |       defaultValue: true,
+    237 |     },
+    238 |   ],
+
+ERROR in src/pages/OnboardingPage.tsx:235:40
+TS2304: Cannot find name 'make'.
+    233 |       type: "checkbox",
+    234 |       label: "I agree to the Terms and Conditions",
+  > 235 |       isRequired: false,# FIXME: DEMO: make it required
+        |                                        ^^^^
+    236 |       defaultValue: true,
+    237 |     },
+    238 |   ],
+
+ERROR in src/pages/OnboardingPage.tsx:235:45
+TS1005: ',' expected.
+    233 |       type: "checkbox",
+    234 |       label: "I agree to the Terms and Conditions",
+  > 235 |       isRequired: false,# FIXME: DEMO: make it required
+        |                                             ^^
+    236 |       defaultValue: true,
+    237 |     },
+    238 |   ],
+
+ERROR in src/pages/OnboardingPage.tsx:235:45
+TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+    233 |       type: "checkbox",
+    234 |       label: "I agree to the Terms and Conditions",
+  > 235 |       isRequired: false,# FIXME: DEMO: make it required
+        |                                             ^^
+    236 |       defaultValue: true,
+    237 |     },
+    238 |   ],
+
+ERROR in src/pages/OnboardingPage.tsx:235:48
+TS1005: ',' expected.
+    233 |       type: "checkbox",
+    234 |       label: "I agree to the Terms and Conditions",
+  > 235 |       isRequired: false,# FIXME: DEMO: make it required
+        |                                                ^^^^^^^^
+    236 |       defaultValue: true,
+    237 |     },
+    238 |   ],
+
+ERROR in src/pages/OnboardingPage.tsx:235:48
+TS2552: Cannot find name 'required'. Did you mean 'require'?
+    233 |       type: "checkbox",
+    234 |       label: "I agree to the Terms and Conditions",
+  > 235 |       isRequired: false,# FIXME: DEMO: make it required
+        |                                                ^^^^^^^^
+    236 |       defaultValue: true,
+    237 |     },
+    238 |   ],
+
+ERROR in src/pages/OnboardingPage.tsx:236:7
+TS1005: ',' expected.
+    234 |       label: "I agree to the Terms and Conditions",
+    235 |       isRequired: false,# FIXME: DEMO: make it required
+  > 236 |       defaultValue: true,
+        |       ^^^^^^^^^^^^
+    237 |     },
+    238 |   ],
+    239 |
+
+Compiling...
+Compiled successfully!
+webpack compiled successfully
+Compiling...
+No issues found.
+Compiled successfully!
+webpack compiled successfully
+No issues found.
+Compiling...
+Compiled successfully!
+webpack compiled successfully
+No issues found.
+Compiling...
+Compiled successfully!
+webpack compiled successfully
+No issues found.
+Compiling...
+Compiled successfully!
+webpack compiled successfully
+No issues found.
+Compiling...
+Compiled successfully!
+webpack compiled successfully
+No issues found.
+Compiling...
+Compiled successfully!
+webpack compiled successfully
+No issues found.
+Compiling...
+Compiled successfully!
+webpack compiled successfully
+No issues found.
+Compiling...
+Compiled successfully!
+webpack compiled successfully
+No issues found.
+Compiling...
+Compiled successfully!
+webpack compiled successfully
+No issues found.
+Compiling...
+Compiled successfully!
+webpack compiled successfully
+No issues found.
+Compiling...
+Compiled successfully!
+webpack compiled successfully
+No issues found.
+Compiling...
+Compiled successfully!
+webpack compiled successfully
+Compiling...
+No issues found.
+Compiled successfully!
+webpack compiled successfully
+No issues found.
+Compiling...
+Compiled successfully!
+webpack compiled successfully
+No issues found.
+Compiling...
+Compiled successfully!
+webpack compiled successfully
+No issues found.
+Compiling...
+Compiled successfully!
+webpack compiled successfully
+No issues found.
+Compiling...
+Compiled successfully!
+webpack compiled successfully
+No issues found.
+Compiling...
+Compiled successfully!
+webpack compiled successfully
+No issues found.
+Compiling...
+Compiled successfully!
+webpack compiled successfully
+No issues found.

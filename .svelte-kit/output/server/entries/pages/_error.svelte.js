@@ -17,7 +17,6 @@ import "yaml";
 import "@astronautlabs/jsonpath";
 import "dequal";
 import "tua-body-scroll-lock";
-import "echarts";
 import "debounce";
 import "downloadjs";
 import "echarts-stat";
@@ -565,7 +564,7 @@ const CopyButton = create_ssr_component(($$result, $$props, $$bindings, slots) =
   let { textToCopy = "" } = $$props;
   if ($$props.textToCopy === void 0 && $$bindings.textToCopy && textToCopy !== void 0)
     $$bindings.textToCopy(textToCopy);
-  return `<div class="relative">${``} <button class="bg-white-100/80 border border-gray-950 rounded p-2 hover:bg-gray-200/80 active:bg-gray-400/80" title="Copy to Clipboard">${validate_component(Icon, "Icon").$$render($$result, { src: Clipboard, class: "w-4 h-4" }, {}, {})}</button></div>`;
+  return `<div class="relative">${``} <button class="bg-white/80 border border-gray-950 rounded p-2 hover:bg-gray-200/80 active:bg-gray-400/80" title="Copy to Clipboard">${validate_component(Icon, "Icon").$$render($$result, { src: Clipboard, class: "w-4 h-4" }, {}, {})}</button></div>`;
 });
 const Error = create_ssr_component(($$result, $$props, $$bindings, slots) => {
   let expanded;

@@ -2,11 +2,11 @@ import { sveltekit } from "@sveltejs/kit/vite"
 import { evidenceVitePlugin } from "@evidence-dev/plugin-connector"
 import { createLogger } from 'vite';
 import { sourceQueryHmr } from '@evidence-dev/sdk/vite';
+import { defineConfig } from 'vite';
 
 const logger = createLogger();
 const loggerWarn = logger.warn;
 const loggerOnce = logger.warnOnce
-
 /**
  * @see https://github.com/evidence-dev/evidence/issues/1876
  * Ignore the duckdb-wasm sourcemap warning
@@ -28,7 +28,13 @@ const strictFs = (process.env.NODE_ENV === 'development') ? false : true;
 /** @type {import('vite').UserConfig} */
 const config =
 {
-	plugins: [sveltekit(), evidenceVitePlugin(), sourceQueryHmr()],
+	plugins: [sveltekit(), evidenceVitePlugin(), sourceQueryHmr(),  defineConfig({
+		resolve: {
+		  alias: {
+			'zrender/lib/core/Transformable.js': 'zrender/lib/core/Transformable'
+		  }
+		}
+	  })],
 	optimizeDeps: {
 		include: ['echarts-stat', 'echarts', 'blueimp-md5', 'nanoid', '@uwdata/mosaic-sql',
 			// We need these to prevent HMR from doing a full page reload
@@ -42,6 +48,7 @@ const config =
 				'./component-utilities/profile',
 				'@evidence-dev/sdk/usql',
 				'debounce',
+				
 				'@duckdb/duckdb-wasm',
 				'apache-arrow'
 			])

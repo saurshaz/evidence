@@ -46,10 +46,11 @@ const config = {
 	],
 	onwarn: errorHandler,
 	kit: {
+		adapter: adapter(),
 		// adapter: adapter({
 		// 	strict: false
 		// }),
-		adapter: adapter({	strict: false }),
+		// adapter: adapter({	strict: false }),
 		files: {
 			routes: 'src/pages',
 			lib: 'src/components'

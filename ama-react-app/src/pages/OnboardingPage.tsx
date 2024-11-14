@@ -190,7 +190,7 @@ const config = {
     {
       key: "widget_text_size_1",
       type: "select",
-      label: "Heding text size",
+      label: "Heading text size",
       isRequired: true,
       tooltip: "Choose the heading font for text in widgets",
       defaultValue: "12",
